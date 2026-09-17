@@ -1,4 +1,4 @@
-package com.example.opr_now
+package de.pstolpm.oprnow
 
 import io.flutter.embedding.android.FlutterActivity
 
