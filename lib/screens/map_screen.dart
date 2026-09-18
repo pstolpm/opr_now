@@ -3,24 +3,35 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:maplibre_gl/maplibre_gl.dart';
 
+import '../models/user_position.dart';
+import '../services/location_controller.dart';
+import '../services/location_source.dart';
 import '../utils/constants.dart';
+import '../utils/demo_locations.dart';
 
-/// Zentrale Kartenansicht der App (Phase 2).
+/// Zentrale Kartenansicht der App.
 ///
-/// Zeigt eine MapLibre-Vektorkarte, zentriert auf den Landkreis
-/// Ostprignitz-Ruppin. Weitere Layer (POIs, Standort, Route, Meldungen)
-/// werden in den folgenden Phasen ergänzt.
+/// Phase 2: MapLibre-Karte, zentriert auf den Landkreis OPR.
+/// Phase 3: eigener Standort (GPS oder Demo) als GeoJSON-Layer,
+///          Moduswechsel, Fehlermeldungen.
 class MapScreen extends StatefulWidget {
-  const MapScreen({super.key});
+  const MapScreen({super.key, required this.locationController});
+
+  final LocationController locationController;
 
   @override
   State<MapScreen> createState() => _MapScreenState();
 }
 
 class _MapScreenState extends State<MapScreen> {
+  // --- MapLibre-IDs für Quelle und Layer des Nutzerstandorts -------------
+  static const _userSourceId = 'user-location';
+  static const _userHaloLayerId = 'user-location-halo';
+  static const _userDotLayerId = 'user-location-dot';
+
   /// Controller zum Steuern der Karte (Kamera, Layer). Wird von
   /// MapLibre nach dem Erzeugen der nativen Kartenansicht geliefert.
-  MapLibreMapController? _controller;
+  MapLibreMapController? _map;
 
   /// true, sobald der Kartenstil (inkl. erster Kacheln) geladen ist.
   bool _styleLoaded = false;
@@ -30,6 +41,16 @@ class _MapScreenState extends State<MapScreen> {
   bool _loadTimedOut = false;
 
   Timer? _loadTimer;
+
+  /// Damit die Karte beim ersten Standort automatisch dorthin springt,
+  /// aber nicht bei jedem weiteren Update.
+  bool _centeredOnFirstFix = false;
+
+  /// Letzter angezeigter Fehler, um denselben Fehler nicht mehrfach als
+  /// SnackBar zu zeigen.
+  LocationFailure? _lastShownFailure;
+
+  LocationController get _location => widget.locationController;
 
   @override
   void initState() {
@@ -41,33 +62,180 @@ class _MapScreenState extends State<MapScreen> {
         setState(() => _loadTimedOut = true);
       }
     });
+    _location.addListener(_onLocationChanged);
   }
 
   @override
   void dispose() {
     _loadTimer?.cancel();
+    _location.removeListener(_onLocationChanged);
     super.dispose();
   }
 
+  // --- MapLibre-Callbacks --------------------------------------------------
+
   void _onMapCreated(MapLibreMapController controller) {
-    _controller = controller;
+    _map = controller;
   }
 
-  void _onStyleLoaded() {
+  Future<void> _onStyleLoaded() async {
     _loadTimer?.cancel();
-    if (mounted) {
-      setState(() {
-        _styleLoaded = true;
-        _loadTimedOut = false;
-      });
+    await _addUserLocationLayers();
+    if (!mounted) return;
+    setState(() {
+      _styleLoaded = true;
+      _loadTimedOut = false;
+    });
+    // Falls schon eine Position vorliegt, sofort anzeigen.
+    _onLocationChanged();
+  }
+
+  /// Legt GeoJSON-Quelle und zwei Circle-Layer für den Nutzerstandort an.
+  ///
+  /// Die Farbe wird datengetrieben aus dem Feature-Attribut `source`
+  /// abgeleitet (MapLibre-Expression): Demo = orange, GPS = blau. So ist
+  /// auf der Karte jederzeit erkennbar, ob simuliert wird.
+  Future<void> _addUserLocationLayers() async {
+    final map = _map;
+    if (map == null) return;
+
+    await map.addSource(
+      _userSourceId,
+      const GeojsonSourceProperties(
+        data: {'type': 'FeatureCollection', 'features': []},
+      ),
+    );
+
+    const colorBySource = [
+      'match',
+      ['get', 'source'],
+      'demo',
+      '#FB8C00', // orange
+      '#1E88E5', // blau
+    ];
+
+    await map.addCircleLayer(
+      _userSourceId,
+      _userHaloLayerId,
+      const CircleLayerProperties(
+        circleRadius: 16,
+        circleColor: colorBySource,
+        circleOpacity: 0.25,
+      ),
+    );
+    await map.addCircleLayer(
+      _userSourceId,
+      _userDotLayerId,
+      const CircleLayerProperties(
+        circleRadius: 7,
+        circleColor: colorBySource,
+        circleStrokeWidth: 2.5,
+        circleStrokeColor: '#FFFFFF',
+      ),
+    );
+  }
+
+  // --- Standort-Änderungen -------------------------------------------------
+
+  /// Wird bei jeder Änderung im [LocationController] aufgerufen.
+  void _onLocationChanged() {
+    if (!mounted) return;
+    setState(() {}); // Banner / Busy-Anzeige aktualisieren
+    _updateUserLocationOnMap();
+    _showFailureIfNew();
+  }
+
+  Future<void> _updateUserLocationOnMap() async {
+    final map = _map;
+    if (map == null || !_styleLoaded) return;
+
+    final position = _location.position;
+    final features = <Map<String, dynamic>>[
+      if (position != null) position.toGeoJsonFeature(),
+    ];
+    await map.setGeoJsonSource(_userSourceId, {
+      'type': 'FeatureCollection',
+      'features': features,
+    });
+
+    if (position != null && !_centeredOnFirstFix) {
+      _centeredOnFirstFix = true;
+      await _centerOn(position, zoom: 13);
     }
   }
 
+  Future<void> _centerOn(UserPosition position, {double zoom = 14}) async {
+    await _map?.animateCamera(
+      CameraUpdate.newLatLngZoom(
+        LatLng(position.latitude, position.longitude),
+        zoom,
+      ),
+    );
+  }
+
+  void _showFailureIfNew() {
+    final failure = _location.failure;
+    if (failure == null) {
+      _lastShownFailure = null;
+      return;
+    }
+    if (failure == _lastShownFailure) return;
+    _lastShownFailure = failure;
+
+    final messenger = ScaffoldMessenger.of(context);
+    messenger.hideCurrentSnackBar();
+    messenger.showSnackBar(_buildFailureSnackBar(failure));
+  }
+
+  /// Verständliche Meldung je Fehlerfall, wo sinnvoll mit Aktion.
+  SnackBar _buildFailureSnackBar(LocationFailure failure) {
+    switch (failure) {
+      case LocationFailure.serviceDisabled:
+        return SnackBar(
+          content: const Text('Standortdienste sind ausgeschaltet.'),
+          action: SnackBarAction(
+            label: 'Einstellungen',
+            onPressed: _location.openLocationSettings,
+          ),
+          duration: const Duration(seconds: 8),
+        );
+      case LocationFailure.permissionDenied:
+        return SnackBar(
+          content: const Text('Standortberechtigung wurde verweigert.'),
+          action: SnackBarAction(
+            label: 'Erneut fragen',
+            onPressed: _location.startTracking,
+          ),
+          duration: const Duration(seconds: 8),
+        );
+      case LocationFailure.permissionDeniedForever:
+        return SnackBar(
+          content: const Text(
+            'Standortberechtigung dauerhaft verweigert. '
+            'Bitte in den App-Einstellungen erlauben oder Demo-Modus nutzen.',
+          ),
+          action: SnackBarAction(
+            label: 'App-Einstellungen',
+            onPressed: _location.openAppSettings,
+          ),
+          duration: const Duration(seconds: 10),
+        );
+      case LocationFailure.timeout:
+        return const SnackBar(
+          content: Text('Keine Position erhalten (Zeitlimit). Bitte erneut versuchen.'),
+        );
+      case LocationFailure.unknown:
+        return const SnackBar(
+          content: Text('Standort konnte nicht ermittelt werden.'),
+        );
+    }
+  }
+
+  // --- Aktionen ------------------------------------------------------------
+
   /// Kamera zurück auf den gesamten Landkreis setzen.
   Future<void> _showWholeDistrict() async {
-    final controller = _controller;
-    if (controller == null) return;
-    await controller.animateCamera(
+    await _map?.animateCamera(
       CameraUpdate.newLatLngBounds(
         MapConstants.oprBounds,
         left: 24,
@@ -78,41 +246,139 @@ class _MapScreenState extends State<MapScreen> {
     );
   }
 
+  /// Einmalig orten und auf die Position zentrieren.
+  Future<void> _locateMe() async {
+    final position = await _location.locateOnce();
+    if (position != null) {
+      await _centerOn(position);
+    }
+  }
+
+  // --- UI ------------------------------------------------------------------
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('OPR NOW'),
+        actions: [_buildModeMenu()],
       ),
-      body: Stack(
+      body: Column(
         children: [
-          MapLibreMap(
-            styleString: MapConstants.styleUrl,
-            initialCameraPosition: const CameraPosition(
-              target: MapConstants.oprCenter,
-              zoom: MapConstants.initialZoom,
+          if (_location.isDemo) _DemoBanner(name: _location.demoLocation.name),
+          Expanded(
+            child: Stack(
+              children: [
+                MapLibreMap(
+                  styleString: MapConstants.styleUrl,
+                  initialCameraPosition: const CameraPosition(
+                    target: MapConstants.oprCenter,
+                    zoom: MapConstants.initialZoom,
+                  ),
+                  onMapCreated: _onMapCreated,
+                  onStyleLoadedCallback: _onStyleLoaded,
+                  // Eigener Standort wird als GeoJSON-Layer gezeichnet
+                  // (funktioniert auch im Demo-Modus), daher aus.
+                  myLocationEnabled: false,
+                  // Dreh- und Neigegesten für den MVP deaktivieren:
+                  // vereinfacht die Bedienung, "Norden oben" bleibt.
+                  rotateGesturesEnabled: false,
+                  tiltGesturesEnabled: false,
+                ),
+                if (!_styleLoaded)
+                  Center(
+                    child: _loadTimedOut
+                        ? const _MapLoadHint()
+                        : const CircularProgressIndicator(),
+                  ),
+              ],
             ),
-            onMapCreated: _onMapCreated,
-            onStyleLoadedCallback: _onStyleLoaded,
-            // Standort-Layer kommt in Phase 3 (Berechtigungen nötig).
-            myLocationEnabled: false,
-            // Dreh- und Neigegesten für den MVP deaktivieren:
-            // vereinfacht die Bedienung, "Norden oben" bleibt erhalten.
-            rotateGesturesEnabled: false,
-            tiltGesturesEnabled: false,
           ),
-          if (!_styleLoaded)
-            Center(
-              child: _loadTimedOut
-                  ? const _MapLoadHint()
-                  : const CircularProgressIndicator(),
-            ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _showWholeDistrict,
-        tooltip: 'Gesamten Landkreis anzeigen',
-        child: const Icon(Icons.zoom_out_map),
+      floatingActionButton: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          FloatingActionButton.small(
+            heroTag: 'fab-district',
+            onPressed: _showWholeDistrict,
+            tooltip: 'Gesamten Landkreis anzeigen',
+            child: const Icon(Icons.zoom_out_map),
+          ),
+          const SizedBox(height: 12),
+          FloatingActionButton(
+            heroTag: 'fab-locate',
+            onPressed: _location.busy ? null : _locateMe,
+            tooltip: 'Auf meinen Standort zentrieren',
+            child: _location.busy
+                ? const SizedBox(
+                    width: 22,
+                    height: 22,
+                    child: CircularProgressIndicator(strokeWidth: 2.5),
+                  )
+                : const Icon(Icons.my_location),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Menü zum Umschalten zwischen echtem GPS und Demo-Standorten.
+  Widget _buildModeMenu() {
+    return PopupMenuButton<String>(
+      tooltip: 'Standortmodus',
+      icon: Icon(_location.isDemo ? Icons.science : Icons.gps_fixed),
+      onSelected: (value) {
+        if (value == 'gps') {
+          _location.setMode(LocationMode.gps);
+        } else {
+          final demo = demoLocations.firstWhere((d) => d.id == value);
+          _location.selectDemoLocation(demo);
+        }
+      },
+      itemBuilder: (context) => [
+        CheckedPopupMenuItem(
+          value: 'gps',
+          checked: !_location.isDemo,
+          child: const Text('Echtes GPS'),
+        ),
+        const PopupMenuDivider(),
+        for (final demo in demoLocations)
+          CheckedPopupMenuItem(
+            value: demo.id,
+            checked: _location.isDemo && _location.demoLocation.id == demo.id,
+            child: Text('Demo – ${demo.name}'),
+          ),
+      ],
+    );
+  }
+}
+
+/// Deutlich sichtbarer Hinweis, dass der Standort simuliert wird
+/// (PROJECT_BRAIN Abschnitt 26: Demo-Modus klar kennzeichnen).
+class _DemoBanner extends StatelessWidget {
+  const _DemoBanner({required this.name});
+
+  final String name;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.orange.shade700,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        child: Row(
+          children: [
+            const Icon(Icons.science, color: Colors.white, size: 20),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                'Demo-Standort: $name (simuliert)',
+                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -46,3 +46,6 @@ app.*.map.json
 
 # Widget Preview related
 .widget_preview/
+
+# Ablage fuer Dateien, die Claude nicht selbst loeschen darf (manuell loeschen)
+_to_delete/

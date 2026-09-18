@@ -1,6 +1,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <!-- Internetzugriff fuer Kartenkacheln (OpenFreeMap) und spaetere Geodaten-APIs -->
     <uses-permission android:name="android.permission.INTERNET"/>
+    <!-- Standortzugriff im Vordergrund (Phase 3). Kein Hintergrund-Tracking, siehe PROJECT_BRAIN 8 und 36 -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
 
     <application
         android:label="OPR NOW"

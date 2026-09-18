@@ -38,6 +38,9 @@ dependencies:
   # MapLibre-Kartendarstellung (Vektorkarten, GeoJSON-Layer) - Phase 2
   maplibre_gl: ^0.27.1
 
+  # Standortbestimmung (Berechtigungen, GPS-Position, Positions-Stream) - Phase 3
+  geolocator: ^14.0.3
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
