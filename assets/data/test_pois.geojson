@@ -1,0 +1,243 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "id": "sehenswuerdigkeit-1",
+      "properties": {
+        "name": "Schloss Rheinsberg",
+        "category": "sehenswuerdigkeit",
+        "source": "test",
+        "description": "Barockschloss am Grienericksee, bekannt durch Fontane und Tucholsky."
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          12.893,
+          53.0978
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "sehenswuerdigkeit-2",
+      "properties": {
+        "name": "Fontane-Denkmal Neuruppin",
+        "category": "sehenswuerdigkeit",
+        "source": "test",
+        "description": "Denkmal fuer den in Neuruppin geborenen Schriftsteller Theodor Fontane."
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          12.801,
+          52.928
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "sehenswuerdigkeit-3",
+      "properties": {
+        "name": "Propsteikirche St. Marien Wittstock",
+        "category": "sehenswuerdigkeit",
+        "source": "test",
+        "description": "Gotische Kirche in der Altstadt von Wittstock/Dosse."
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          12.482,
+          53.164
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "sehenswuerdigkeit-4",
+      "properties": {
+        "name": "Rathaus Kyritz",
+        "category": "sehenswuerdigkeit",
+        "source": "test",
+        "description": "Historisches Rathaus am Marktplatz der Rolandstadt Kyritz."
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          12.397,
+          52.9395
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "natur-1",
+      "properties": {
+        "name": "Aussichtspunkt Wallberg Neuruppin",
+        "category": "natur",
+        "source": "test",
+        "description": "Erhebung am Stadtrand mit Blick ueber Neuruppin und den Ruppiner See."
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          12.809,
+          52.933
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "natur-2",
+      "properties": {
+        "name": "Naturpark-Infopunkt Stechlin",
+        "category": "natur",
+        "source": "test",
+        "description": "Informationspunkt am Rand des Naturparks Stechlin-Ruppiner Land."
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          13.035,
+          53.145
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "natur-3",
+      "properties": {
+        "name": "Ruppiner Seenkette Aussicht",
+        "category": "natur",
+        "source": "test",
+        "description": "Aussichtspunkt entlang der Ruppiner Seenkette zwischen Neuruppin und Rheinsberg."
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          12.85,
+          53.01
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "natur-4",
+      "properties": {
+        "name": "Dosseniederung bei Wittstock",
+        "category": "natur",
+        "source": "test",
+        "description": "Naturraum entlang der Dosse noerdlich von Wittstock."
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          12.51,
+          53.15
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "badestelle-1",
+      "properties": {
+        "name": "Strandbad Neuruppin",
+        "category": "badestelle",
+        "source": "test",
+        "description": "Offizielles Strandbad am Ruppiner See."
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          12.81,
+          52.921
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "badestelle-2",
+      "properties": {
+        "name": "Strandbad Rheinsberg",
+        "category": "badestelle",
+        "source": "test",
+        "description": "Badestelle am Grienericksee bei Rheinsberg."
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          12.898,
+          53.094
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "badestelle-3",
+      "properties": {
+        "name": "Badestelle Zermuetzelsee",
+        "category": "badestelle",
+        "source": "test",
+        "description": "Naturnahe Badestelle am Zermuetzelsee im Naturpark Stechlin-Ruppiner Land."
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          12.97,
+          53.03
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "gastronomie-1",
+      "properties": {
+        "name": "Cafe am Seeufer Neuruppin",
+        "category": "gastronomie",
+        "source": "test",
+        "description": "Testeintrag: Cafe mit Blick auf den Ruppiner See."
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          12.805,
+          52.925
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "gastronomie-2",
+      "properties": {
+        "name": "Gasthaus Rheinsberg",
+        "category": "gastronomie",
+        "source": "test",
+        "description": "Testeintrag: Gasthaus in der Altstadt von Rheinsberg."
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          12.895,
+          53.096
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "gastronomie-3",
+      "properties": {
+        "name": "Fischerhuette Wittstock",
+        "category": "gastronomie",
+        "source": "test",
+        "description": "Testeintrag: Imbiss/Fischerhuette am Stadtrand von Wittstock."
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          12.478,
+          53.161
+        ]
+      }
+    }
+  ]
+}

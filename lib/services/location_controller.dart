@@ -110,6 +110,14 @@ class LocationController extends ChangeNotifier {
     if (_mode != LocationMode.demo) {
       await setMode(LocationMode.demo);
     } else {
+      // _demo.setLocation() aktualisiert die interne Position sofort
+      // (synchron), verschickt sie aber zusätzlich über einen Stream, der
+      // seine Listener erst im nächsten Microtask benachrichtigt. Ohne diese
+      // Zeile würde notifyListeners() unten die UI mit der noch alten
+      // Position benachrichtigen (falsches Zentrieren auf der Karte), obwohl
+      // demoLocation schon auf den neu gewählten Ort zeigt.
+      _position = _demo.current;
+      _failure = null;
       notifyListeners();
     }
   }

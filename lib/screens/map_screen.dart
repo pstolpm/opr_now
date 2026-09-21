@@ -1,13 +1,17 @@
 import 'dart:async';
+import 'dart:math' show Point;
 
 import 'package:flutter/material.dart';
 import 'package:maplibre_gl/maplibre_gl.dart';
 
+import '../models/poi.dart';
 import '../models/user_position.dart';
+import '../repositories/poi_repository.dart';
 import '../services/location_controller.dart';
 import '../services/location_source.dart';
 import '../utils/constants.dart';
 import '../utils/demo_locations.dart';
+import 'poi_detail_screen.dart';
 
 /// Zentrale Kartenansicht der App.
 ///
@@ -29,6 +33,16 @@ class _MapScreenState extends State<MapScreen> {
   static const _userHaloLayerId = 'user-location-halo';
   static const _userDotLayerId = 'user-location-dot';
 
+  // --- MapLibre-IDs für Quelle und Layer der Test-POIs (Phase 4) ---------
+  static const _poiSourceId = 'test-pois';
+  static const _poiLayerId = 'test-poi-dots';
+
+  final _poiRepository = const PoiRepository();
+
+  /// Geladene Test-POIs, nach id indiziert, damit ein Tap auf die Karte
+  /// (liefert nur die id) den passenden [Poi] wiederfindet.
+  Map<String, Poi> _poiById = {};
+
   /// Controller zum Steuern der Karte (Kamera, Layer). Wird von
   /// MapLibre nach dem Erzeugen der nativen Kartenansicht geliefert.
   MapLibreMapController? _map;
@@ -42,9 +56,12 @@ class _MapScreenState extends State<MapScreen> {
 
   Timer? _loadTimer;
 
-  /// Damit die Karte beim ersten Standort automatisch dorthin springt,
-  /// aber nicht bei jedem weiteren Update.
-  bool _centeredOnFirstFix = false;
+  /// Kennung der Quelle, auf die zuletzt zentriert wurde (z. B. `gps`
+  /// oder `demo:neuruppin`). Damit springt die Karte beim ersten Fix
+  /// einer Quelle automatisch dorthin, aber nicht bei jedem weiteren
+  /// Positions-Update derselben Quelle. Ändert sich die Quelle (Moduswechsel
+  /// GPS/Demo oder Wechsel des Demo-Standorts), wird erneut zentriert.
+  String? _lastCenteredKey;
 
   /// Letzter angezeigter Fehler, um denselben Fehler nicht mehrfach als
   /// SnackBar zu zeigen.
@@ -69,6 +86,7 @@ class _MapScreenState extends State<MapScreen> {
   void dispose() {
     _loadTimer?.cancel();
     _location.removeListener(_onLocationChanged);
+    _map?.onFeatureTapped.remove(_onFeatureTapped);
     super.dispose();
   }
 
@@ -76,11 +94,13 @@ class _MapScreenState extends State<MapScreen> {
 
   void _onMapCreated(MapLibreMapController controller) {
     _map = controller;
+    _map!.onFeatureTapped.add(_onFeatureTapped);
   }
 
   Future<void> _onStyleLoaded() async {
     _loadTimer?.cancel();
     await _addUserLocationLayers();
+    await _loadAndShowPois();
     if (!mounted) return;
     setState(() {
       _styleLoaded = true;
@@ -135,6 +155,84 @@ class _MapScreenState extends State<MapScreen> {
     );
   }
 
+  // --- Test-POIs (Phase 4) --------------------------------------------------
+
+  /// Lädt die lokalen Test-POIs (assets/data/test_pois.geojson) und zeigt
+  /// sie als eigenen GeoJSON-Layer auf der Karte an. Ab Phase 5 treten
+  /// weitere Quellen hinzu (PROJECT_BRAIN Abschnitt 11).
+  Future<void> _loadAndShowPois() async {
+    final map = _map;
+    if (map == null) return;
+
+    final pois = await _poiRepository.loadTestPois();
+    if (!mounted) return;
+    _poiById = {for (final poi in pois) poi.id: poi};
+
+    await map.addSource(
+      _poiSourceId,
+      GeojsonSourceProperties(
+        data: {
+          'type': 'FeatureCollection',
+          'features': [for (final poi in pois) _poiToGeoJsonFeature(poi)],
+        },
+      ),
+    );
+
+    // Farbe je Kategorie (MapLibre-Expression, PROJECT_BRAIN Abschnitt 34/
+    // "genaue UI-Gestaltung" ist offen, siehe Abschnitt 48 – vorläufige,
+    // klar unterscheidbare Testfarben).
+    const colorByCategory = [
+      'match',
+      ['get', 'category'],
+      'sehenswuerdigkeit', '#8E24AA', // lila
+      'natur', '#43A047', // grün
+      'badestelle', '#039BE5', // hellblau
+      'gastronomie', '#F4511E', // orange-rot
+      '#757575', // Fallback: grau
+    ];
+
+    await map.addCircleLayer(
+      _poiSourceId,
+      _poiLayerId,
+      const CircleLayerProperties(
+        circleRadius: 8,
+        circleColor: colorByCategory,
+        circleStrokeWidth: 1.5,
+        circleStrokeColor: '#FFFFFF',
+      ),
+    );
+  }
+
+  Map<String, dynamic> _poiToGeoJsonFeature(Poi poi) {
+    return {
+      'type': 'Feature',
+      'id': poi.id,
+      'properties': {'category': poi.category},
+      // GeoJSON-Koordinatenreihenfolge: [longitude, latitude].
+      'geometry': {
+        'type': 'Point',
+        'coordinates': [poi.longitude, poi.latitude],
+      },
+    };
+  }
+
+  /// Reagiert auf einen Tap auf eine Karten-Feature (POI-Layer) und öffnet
+  /// die Detailansicht des zugehörigen POI.
+  void _onFeatureTapped(
+    Point<double> point,
+    LatLng coordinates,
+    String id,
+    String layerId,
+    Annotation? annotation,
+  ) {
+    if (layerId != _poiLayerId) return;
+    final poi = _poiById[id];
+    if (poi == null) return;
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => PoiDetailScreen(poi: poi)),
+    );
+  }
+
   // --- Standort-Änderungen -------------------------------------------------
 
   /// Wird bei jeder Änderung im [LocationController] aufgerufen.
@@ -158,8 +256,10 @@ class _MapScreenState extends State<MapScreen> {
       'features': features,
     });
 
-    if (position != null && !_centeredOnFirstFix) {
-      _centeredOnFirstFix = true;
+    final currentKey =
+        _location.isDemo ? 'demo:${_location.demoLocation.id}' : 'gps';
+    if (position != null && currentKey != _lastCenteredKey) {
+      _lastCenteredKey = currentKey;
       await _centerOn(position, zoom: 13);
     }
   }

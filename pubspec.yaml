@@ -63,6 +63,11 @@ flutter:
   # the material Icons class.
   uses-material-design: true
 
+  # Lokale Testdaten (Phase 4): POIs als GeoJSON, bevor externe APIs
+  # (OSM/Overpass, Overture, ...) angebunden werden - PROJECT_BRAIN Phase 4/5.
+  assets:
+    - assets/data/test_pois.geojson
+
   # To add assets to your application, add an assets section, like this:
   # assets:
   #   - images/a_dot_burr.jpeg
