@@ -50,4 +50,55 @@ class Poi {
       description: properties['description'] as String?,
     );
   }
+
+  /// Erstellt einen [Poi] aus einem Overpass-API-Element (Node mit Tags).
+  ///
+  /// Erwartet, dass `tags['name']`, `lat` und `lon` vorhanden sind - das
+  /// wird bereits beim Laden in [OverpassService] gefiltert.
+  factory Poi.fromOverpassElement(Map<String, dynamic> element) {
+    final tags = element['tags'] as Map<String, dynamic>;
+    return Poi(
+      id: 'osm:${element['id']}',
+      name: tags['name'] as String,
+      latitude: (element['lat'] as num).toDouble(),
+      longitude: (element['lon'] as num).toDouble(),
+      category: _categoryFromOsmTags(tags),
+      source: 'osm',
+      description: tags['tourism'] as String? ??
+          tags['historic'] as String? ??
+          tags['amenity'] as String? ??
+          tags['leisure'] as String? ??
+          tags['natural'] as String?,
+    );
+  }
+
+  /// Ordnet OSM-Tags einer der vier App-Kategorien zu (siehe
+  /// [OverpassService] und die Farbgebung in map_screen.dart). Eine
+  /// vollständige/endgültige Kategorisierung ist eine offene Entscheidung
+  /// (PROJECT_BRAIN Abschnitt 48).
+  static String _categoryFromOsmTags(Map<String, dynamic> tags) {
+    final tourism = tags['tourism'] as String?;
+    final leisure = tags['leisure'] as String?;
+
+    if (tourism == 'viewpoint' || leisure == 'nature_reserve') {
+      return 'natur';
+    }
+    if (tags.containsKey('historic') ||
+        (tourism != null &&
+            ['attraction', 'museum', 'artwork', 'gallery'].contains(tourism))) {
+      return 'sehenswuerdigkeit';
+    }
+    if (tags['natural'] == 'beach' ||
+        leisure == 'bathing_place' ||
+        leisure == 'swimming_area') {
+      return 'badestelle';
+    }
+    final amenity = tags['amenity'] as String?;
+    if (amenity != null &&
+        ['cafe', 'restaurant', 'fast_food', 'biergarten', 'pub']
+            .contains(amenity)) {
+      return 'gastronomie';
+    }
+    return 'sonstiges';
+  }
 }

@@ -41,6 +41,9 @@ dependencies:
   # Standortbestimmung (Berechtigungen, GPS-Position, Positions-Stream) - Phase 3
   geolocator: ^14.0.3
 
+  # HTTP-Client fuer externe APIs (zunaechst Open-Meteo) - Phase 5
+  dio: ^5.11.1
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

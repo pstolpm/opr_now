@@ -6,9 +6,12 @@ import 'package:maplibre_gl/maplibre_gl.dart';
 
 import '../models/poi.dart';
 import '../models/user_position.dart';
+import '../models/weather_context.dart';
 import '../repositories/poi_repository.dart';
 import '../services/location_controller.dart';
 import '../services/location_source.dart';
+import '../services/overpass_service.dart';
+import '../services/weather_service.dart';
 import '../utils/constants.dart';
 import '../utils/demo_locations.dart';
 import 'poi_detail_screen.dart';
@@ -38,6 +41,7 @@ class _MapScreenState extends State<MapScreen> {
   static const _poiLayerId = 'test-poi-dots';
 
   final _poiRepository = const PoiRepository();
+  final _overpassService = OverpassService();
 
   /// Geladene Test-POIs, nach id indiziert, damit ein Tap auf die Karte
   /// (liefert nur die id) den passenden [Poi] wiederfindet.
@@ -66,6 +70,12 @@ class _MapScreenState extends State<MapScreen> {
   /// Letzter angezeigter Fehler, um denselben Fehler nicht mehrfach als
   /// SnackBar zu zeigen.
   LocationFailure? _lastShownFailure;
+
+  // --- Wetter (Phase 5) -----------------------------------------------------
+  final _weatherService = WeatherService();
+  WeatherContext? _weather;
+  bool _weatherLoading = false;
+  WeatherFailure? _weatherFailure;
 
   LocationController get _location => widget.locationController;
 
@@ -164,7 +174,33 @@ class _MapScreenState extends State<MapScreen> {
     final map = _map;
     if (map == null) return;
 
-    final pois = await _poiRepository.loadTestPois();
+    // Echte POIs aus OpenStreetMap/Overpass (Phase 5), begrenzt auf den
+    // Landkreis OPR. Ist Overpass nicht erreichbar oder liefert nichts,
+    // weichen wir auf die lokalen Test-POIs aus Phase 4 aus, damit die
+    // Karte trotzdem nutzbar bleibt (PROJECT_BRAIN Regel 8).
+    List<Poi> pois;
+    try {
+      pois = await _overpassService.loadPois(MapConstants.oprBounds);
+      if (pois.isEmpty) {
+        debugPrint('Overpass: 0 POIs in der Bounding Box erhalten.');
+        pois = await _poiRepository.loadTestPois();
+      }
+    } on OverpassException catch (e) {
+      // Grund im Debug-Log sichtbar machen (siehe `flutter run`-Konsole),
+      // damit ein Fehlschlag nicht stillschweigend passiert.
+      debugPrint('Overpass fehlgeschlagen: ${e.failure}');
+      pois = await _poiRepository.loadTestPois();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'OSM-Daten nicht erreichbar (${e.failure.name}) – '
+              'zeige lokale Test-POIs.',
+            ),
+          ),
+        );
+      }
+    }
     if (!mounted) return;
     _poiById = {for (final poi in pois) poi.id: poi};
 
@@ -188,7 +224,7 @@ class _MapScreenState extends State<MapScreen> {
       'natur', '#43A047', // grün
       'badestelle', '#039BE5', // hellblau
       'gastronomie', '#F4511E', // orange-rot
-      '#757575', // Fallback: grau
+      '#757575', // Fallback ('sonstiges' und Unbekanntes): grau
     ];
 
     await map.addCircleLayer(
@@ -261,6 +297,36 @@ class _MapScreenState extends State<MapScreen> {
     if (position != null && currentKey != _lastCenteredKey) {
       _lastCenteredKey = currentKey;
       await _centerOn(position, zoom: 13);
+      // Wetter nur bei einem neuen Standort-„Fix" abfragen (nicht bei jedem
+      // laufenden GPS-Update) - vermeidet unnötig viele Open-Meteo-Aufrufe
+      // (PROJECT_BRAIN Abschnitt 35 - Performance).
+      unawaited(_loadWeather(position));
+    }
+  }
+
+  /// Lädt das aktuelle Wetter für [position] von Open-Meteo.
+  Future<void> _loadWeather(UserPosition position) async {
+    if (!mounted) return;
+    setState(() {
+      _weatherLoading = true;
+      _weatherFailure = null;
+    });
+    try {
+      final weather = await _weatherService.getCurrentWeather(
+        latitude: position.latitude,
+        longitude: position.longitude,
+      );
+      if (!mounted) return;
+      setState(() {
+        _weather = weather;
+        _weatherLoading = false;
+      });
+    } on WeatherException catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _weatherFailure = e.failure;
+        _weatherLoading = false;
+      });
     }
   }
 
@@ -391,6 +457,16 @@ class _MapScreenState extends State<MapScreen> {
                         ? const _MapLoadHint()
                         : const CircularProgressIndicator(),
                   ),
+                if (_styleLoaded)
+                  Positioned(
+                    top: 12,
+                    left: 12,
+                    child: _WeatherChip(
+                      weather: _weather,
+                      loading: _weatherLoading,
+                      failure: _weatherFailure,
+                    ),
+                  ),
               ],
             ),
           ),
@@ -481,6 +557,74 @@ class _DemoBanner extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+/// Kleines Wetter-Badge oben links auf der Karte: Temperatur + Icon für den
+/// aktuellen Standort (Phase 5). Zeigt Ladezustand bzw. Fehler kompakt an.
+class _WeatherChip extends StatelessWidget {
+  const _WeatherChip({
+    required this.weather,
+    required this.loading,
+    required this.failure,
+  });
+
+  final WeatherContext? weather;
+  final bool loading;
+  final WeatherFailure? failure;
+
+  @override
+  Widget build(BuildContext context) {
+    final content = _buildContent();
+    if (content == null) return const SizedBox.shrink();
+
+    return Material(
+      color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.92),
+      elevation: 2,
+      borderRadius: BorderRadius.circular(20),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        child: content,
+      ),
+    );
+  }
+
+  Widget? _buildContent() {
+    if (loading && weather == null) {
+      return const SizedBox(
+        width: 16,
+        height: 16,
+        child: CircularProgressIndicator(strokeWidth: 2),
+      );
+    }
+    if (weather != null) {
+      return Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(_weatherIcon(weather!.weatherCode), size: 18),
+          const SizedBox(width: 6),
+          Text('${weather!.temperature.round()} °C'),
+        ],
+      );
+    }
+    if (failure != null) {
+      return const Icon(Icons.cloud_off, size: 18);
+    }
+    return null;
+  }
+
+  IconData _weatherIcon(int code) {
+    // Vereinfachte Zuordnung nach WMO-Wettercode (Open-Meteo-Doku).
+    if (code == 0) return Icons.wb_sunny;
+    if (code <= 3) return Icons.wb_cloudy;
+    if (code == 45 || code == 48) return Icons.cloud;
+    if (code >= 51 && code <= 57) return Icons.grain;
+    if (code >= 61 && code <= 67) return Icons.water_drop;
+    if (code >= 71 && code <= 77) return Icons.ac_unit;
+    if (code >= 80 && code <= 82) return Icons.umbrella;
+    if (code >= 85 && code <= 86) return Icons.ac_unit;
+    if (code >= 95) return Icons.flash_on;
+    return Icons.cloud;
   }
 }
 
