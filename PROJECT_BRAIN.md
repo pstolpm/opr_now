@@ -1097,6 +1097,8 @@ Start
 → Start
 ```
 
+**Entscheidung (nach Phase 7):** Falls umgesetzt, ebenfalls regelbasiert (z. B. einfache Greedy-Heuristik: bestbewerteter POI aus der Context Engine, der noch ins Zeitbudget passt, davon Reisezeit abziehen, wiederholen), keine KI/ML-Lösung - konsistent mit Abschnitt 6 und 24. Wird erst nach stabilem MVP (Phase 8-13) angegangen (Regel 4).
+
 ---
 
 ## Erweiterung 3 – Badestellenlogik
@@ -2173,7 +2175,7 @@ Diese Punkte sind noch nicht final festgelegt und sollen während der Umsetzung 
 [ ] konkrete Valhalla-Instanz bzw. Hosting des Routingdienstes
 [ ] genauer Radius für Overpass-Abfragen
 [ ] endgültige POI-Kategorien
-[ ] endgültiges Scoring der Context Engine
+[x] Scoring der Context Engine (Phase 7, lib/logic/context_engine.dart): 0,40 Distanz + 0,30 Interesse + 0,20 Wetter + 0,10 weiterer Kontext (POI-Detailtiefe), Ausschluss bei Hin-/Rückreisezeit > Zeitbudget. Gewichtung bleibt ein Entwurfswert und kann bei Bedarf angepasst werden.
 [ ] genaue Geofence-Distanz
 [ ] genaue SQLite-Struktur
 [ ] exakte amtliche Badestellenquelle und Datenformat
