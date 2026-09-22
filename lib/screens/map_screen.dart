@@ -234,6 +234,22 @@ class _MapScreenState extends State<MapScreen> {
 
   // --- Test-POIs (Phase 4) --------------------------------------------------
 
+  /// Laedt POIs aus einer lokalen GeoJSON-Quelle (Test-POIs, amtliche
+  /// Badestellen, Overture-Teilmenge) ab und faengt dabei Fehler ab
+  /// (fehlendes/ungueltiges Asset, defekte Geometrie) - eine kaputte
+  /// lokale Datei soll nicht das gesamte POI-Laden zum Absturz bringen
+  /// (PROJECT_BRAIN Regel 8, Abschnitt 38 "ungueltige Geometrien").
+  /// Bei einem Fehler wird eine leere Liste zurueckgegeben, die anderen
+  /// Quellen bleiben davon unberuehrt.
+  Future<List<Poi>> _loadPoisSafely(PoiRepository repo, String label) async {
+    try {
+      return await repo.loadPois();
+    } catch (e) {
+      debugPrint('$label konnten nicht geladen werden: $e');
+      return const [];
+    }
+  }
+
   /// Lädt die lokalen Test-POIs (assets/data/test_pois.geojson) und zeigt
   /// sie als eigenen GeoJSON-Layer auf der Karte an. Ab Phase 5 treten
   /// weitere Quellen hinzu (PROJECT_BRAIN Abschnitt 11).
@@ -252,13 +268,13 @@ class _MapScreenState extends State<MapScreen> {
       pois = await _overpassService.loadPois(MapConstants.oprBounds);
       if (pois.isEmpty) {
         debugPrint('Overpass: 0 POIs in der Bounding Box erhalten.');
-        pois = await _poiRepository.loadPois();
+        pois = await _loadPoisSafely(_poiRepository, 'lokale Test-POIs');
       }
     } on OverpassException catch (e) {
       // Grund im Debug-Log sichtbar machen (siehe `flutter run`-Konsole),
       // damit ein Fehlschlag nicht stillschweigend passiert.
       debugPrint('Overpass fehlgeschlagen: ${e.failure}');
-      pois = await _poiRepository.loadPois();
+      pois = await _loadPoisSafely(_poiRepository, 'lokale Test-POIs');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -274,11 +290,13 @@ class _MapScreenState extends State<MapScreen> {
     // Amtliche Badestellen Brandenburg und eine Overture-Teilmenge ergänzen
     // die OSM-POIs (PROJECT_BRAIN Abschnitt 11.2/11.4). Beide kommen aus
     // lokalen, per ETL-Skript (tools/) erzeugten GeoJSON-Dateien - kein
-    // Netzwerkzugriff zur Laufzeit nötig, daher kein eigener Fehlerfall.
+    // Netzwerkzugriff zur Laufzeit nötig, aber trotzdem über
+    // _loadPoisSafely() abgesichert (defekte/fehlende Asset-Datei soll die
+    // App nicht zum Absturz bringen, PROJECT_BRAIN Regel 8).
     // Bewusst keine Dublettenprüfung gegen OSM (PROJECT_BRAIN Abschnitt 33:
     // für den MVP dürfen Quellen getrennt dargestellt werden).
-    final bathingSites = await _bathingSiteRepository.loadPois();
-    final overturePois = await _overtureRepository.loadPois();
+    final bathingSites = await _loadPoisSafely(_bathingSiteRepository, 'Badestellen');
+    final overturePois = await _loadPoisSafely(_overtureRepository, 'Overture-POIs');
     pois = [...pois, ...bathingSites, ...overturePois];
 
     if (!mounted) return;
@@ -338,13 +356,22 @@ class _MapScreenState extends State<MapScreen> {
   /// eigenen GeoJSON-Layer auf der Karte an (PROJECT_BRAIN Abschnitt 9:
   /// "Die Meldung soll anschliessend auf der Karte dargestellt werden").
   /// Wird beim Start und nach jeder neu gespeicherten Meldung aufgerufen.
+  /// Ein Fehler beim Laden (z. B. defekte lokale Datenbank) darf den
+  /// Start der App nicht verhindern - dann bleibt der Meldungs-Layer
+  /// zunaechst leer statt die App abstuerzen zu lassen (Regel 8).
   Future<void> _loadAndShowReports() async {
     final map = _map;
     if (map == null) return;
     // Vor dem ersten 'await' lesen (lint use_build_context_synchronously).
     final brightness = Theme.of(context).brightness;
 
-    final reports = await _reportRepository.loadReports();
+    List<UserReport> reports;
+    try {
+      reports = await _reportRepository.loadReports();
+    } catch (e) {
+      debugPrint('Meldungen konnten nicht geladen werden: $e');
+      reports = const [];
+    }
     _reportById = {
       for (final report in reports)
         if (report.id != null) 'report:${report.id}': report,
@@ -897,6 +924,14 @@ class _MapScreenState extends State<MapScreen> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(_exportErrorText(e.failure))),
+      );
+    } catch (e) {
+      // z. B. ein Fehler beim Laden aus SQLite statt beim Export selbst -
+      // fachlich fuer den Nutzer dasselbe: der Export ist fehlgeschlagen.
+      debugPrint('Export fehlgeschlagen (Laden der Meldungen): $e');
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Export fehlgeschlagen.')),
       );
     }
   }
