@@ -44,6 +44,9 @@ dependencies:
   # HTTP-Client fuer externe APIs (zunaechst Open-Meteo) - Phase 5
   dio: ^5.11.1
 
+  # Lokale SQLite-Speicherung fuer selbst erfasste Meldungen - Phase 8
+  sqflite: ^2.4.4
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -70,6 +73,8 @@ flutter:
   # (OSM/Overpass, Overture, ...) angebunden werden - PROJECT_BRAIN Phase 4/5.
   assets:
     - assets/data/test_pois.geojson
+    - assets/data/bathing_sites_opr.geojson
+    - assets/data/overture_opr.geojson
 
   # To add assets to your application, add an assets section, like this:
   # assets:

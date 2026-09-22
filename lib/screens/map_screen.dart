@@ -6,15 +6,20 @@ import 'package:maplibre_gl/maplibre_gl.dart';
 
 import '../models/poi.dart';
 import '../models/user_position.dart';
+import '../models/user_report.dart';
 import '../models/weather_context.dart';
+import '../models/route_result.dart';
 import '../repositories/poi_repository.dart';
+import '../repositories/report_repository.dart';
 import '../services/location_controller.dart';
 import '../services/location_source.dart';
 import '../services/overpass_service.dart';
 import '../services/weather_service.dart';
 import '../utils/constants.dart';
 import '../utils/demo_locations.dart';
+import 'discover_screen.dart';
 import 'poi_detail_screen.dart';
+import 'report_screen.dart';
 
 /// Zentrale Kartenansicht der App.
 ///
@@ -41,6 +46,12 @@ class _MapScreenState extends State<MapScreen> {
   static const _poiLayerId = 'test-poi-dots';
 
   final _poiRepository = const PoiRepository();
+  final _bathingSiteRepository = const PoiRepository(
+    assetPath: 'assets/data/bathing_sites_opr.geojson',
+  );
+  final _overtureRepository = const PoiRepository(
+    assetPath: 'assets/data/overture_opr.geojson',
+  );
   final _overpassService = OverpassService();
 
   /// Geladene Test-POIs, nach id indiziert, damit ein Tap auf die Karte
@@ -77,6 +88,22 @@ class _MapScreenState extends State<MapScreen> {
   bool _weatherLoading = false;
   WeatherFailure? _weatherFailure;
 
+  // --- Routing (Phase 6) ------------------------------------------------
+  static const _routeSourceId = 'route';
+  static const _routeLayerId = 'route-line';
+  bool _routeLayerAdded = false;
+
+  // --- Nutzer-Meldungen (Phase 8) -----------------------------------------
+  static const _reportSourceId = 'user-reports';
+  static const _reportLayerId = 'user-report-dots';
+  bool _reportLayerAdded = false;
+  final _reportRepository = ReportRepository();
+
+  /// Geladene Meldungen, nach GeoJSON-Feature-id indiziert (Format
+  /// `report:<sqlite-id>`), damit ein Tap auf die Karte die passende
+  /// UserReport wiederfindet - analog zu _poiById.
+  Map<String, UserReport> _reportById = {};
+
   LocationController get _location => widget.locationController;
 
   @override
@@ -111,6 +138,7 @@ class _MapScreenState extends State<MapScreen> {
     _loadTimer?.cancel();
     await _addUserLocationLayers();
     await _loadAndShowPois();
+    await _loadAndShowReports();
     if (!mounted) return;
     setState(() {
       _styleLoaded = true;
@@ -183,13 +211,13 @@ class _MapScreenState extends State<MapScreen> {
       pois = await _overpassService.loadPois(MapConstants.oprBounds);
       if (pois.isEmpty) {
         debugPrint('Overpass: 0 POIs in der Bounding Box erhalten.');
-        pois = await _poiRepository.loadTestPois();
+        pois = await _poiRepository.loadPois();
       }
     } on OverpassException catch (e) {
       // Grund im Debug-Log sichtbar machen (siehe `flutter run`-Konsole),
       // damit ein Fehlschlag nicht stillschweigend passiert.
       debugPrint('Overpass fehlgeschlagen: ${e.failure}');
-      pois = await _poiRepository.loadTestPois();
+      pois = await _poiRepository.loadPois();
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -201,6 +229,17 @@ class _MapScreenState extends State<MapScreen> {
         );
       }
     }
+
+    // Amtliche Badestellen Brandenburg und eine Overture-Teilmenge ergänzen
+    // die OSM-POIs (PROJECT_BRAIN Abschnitt 11.2/11.4). Beide kommen aus
+    // lokalen, per ETL-Skript (tools/) erzeugten GeoJSON-Dateien - kein
+    // Netzwerkzugriff zur Laufzeit nötig, daher kein eigener Fehlerfall.
+    // Bewusst keine Dublettenprüfung gegen OSM (PROJECT_BRAIN Abschnitt 33:
+    // für den MVP dürfen Quellen getrennt dargestellt werden).
+    final bathingSites = await _bathingSiteRepository.loadPois();
+    final overturePois = await _overtureRepository.loadPois();
+    pois = [...pois, ...bathingSites, ...overturePois];
+
     if (!mounted) return;
     _poiById = {for (final poi in pois) poi.id: poi};
 
@@ -252,6 +291,65 @@ class _MapScreenState extends State<MapScreen> {
     };
   }
 
+  // --- Nutzer-Meldungen (Phase 8) -----------------------------------------
+
+  /// Laedt alle lokal gespeicherten Meldungen aus SQLite und zeigt sie als
+  /// eigenen GeoJSON-Layer auf der Karte an (PROJECT_BRAIN Abschnitt 9:
+  /// "Die Meldung soll anschliessend auf der Karte dargestellt werden").
+  /// Wird beim Start und nach jeder neu gespeicherten Meldung aufgerufen.
+  Future<void> _loadAndShowReports() async {
+    final map = _map;
+    if (map == null) return;
+
+    final reports = await _reportRepository.loadReports();
+    _reportById = {
+      for (final report in reports)
+        if (report.id != null) 'report:${report.id}': report,
+    };
+
+    final data = {
+      'type': 'FeatureCollection',
+      'features': [for (final report in reports) report.toGeoJsonFeature()],
+    };
+
+    if (!_reportLayerAdded) {
+      await map.addSource(
+        _reportSourceId,
+        GeojsonSourceProperties(data: data),
+      );
+      // Eigene, von den POI-Kategorien klar unterscheidbare Farbe
+      // (dunkelrot), damit Nutzer-Meldungen auf der Karte sofort als
+      // "eigener" Layer erkennbar sind.
+      await map.addCircleLayer(
+        _reportSourceId,
+        _reportLayerId,
+        const CircleLayerProperties(
+          circleRadius: 9,
+          circleColor: '#C62828',
+          circleStrokeWidth: 2,
+          circleStrokeColor: '#FFFFFF',
+        ),
+      );
+      _reportLayerAdded = true;
+    } else {
+      await map.setGeoJsonSource(_reportSourceId, data);
+    }
+  }
+
+  /// Oeffnet den "Melden"-Screen (Phase 8) mit dem aktuellen Standort.
+  /// Wurde eine Meldung gespeichert, wird der Meldungen-Layer neu geladen,
+  /// damit sie sofort auf der Karte erscheint.
+  Future<void> _openReport() async {
+    final saved = await Navigator.of(context).push<bool>(
+      MaterialPageRoute(
+        builder: (_) => ReportScreen(position: _location.position),
+      ),
+    );
+    if (saved == true) {
+      await _loadAndShowReports();
+    }
+  }
+
   /// Reagiert auf einen Tap auf eine Karten-Feature (POI-Layer) und öffnet
   /// die Detailansicht des zugehörigen POI.
   void _onFeatureTapped(
@@ -260,12 +358,128 @@ class _MapScreenState extends State<MapScreen> {
     String id,
     String layerId,
     Annotation? annotation,
-  ) {
+  ) async {
+    if (layerId == _reportLayerId) {
+      final report = _reportById[id];
+      if (report == null) return;
+      final label = ReportCategory.labelFor(report.category);
+      final comment = report.comment;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(comment == null ? label : '$label: $comment')),
+      );
+      return;
+    }
     if (layerId != _poiLayerId) return;
     final poi = _poiById[id];
     if (poi == null) return;
-    Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => PoiDetailScreen(poi: poi)),
+
+    final position = _location.position;
+    final route = await Navigator.of(context).push<RouteResult>(
+      MaterialPageRoute(
+        builder: (_) => PoiDetailScreen(
+          poi: poi,
+          currentPosition: position == null
+              ? null
+              : LatLng(position.latitude, position.longitude),
+        ),
+      ),
+    );
+    if (route != null) {
+      await _showRoute(route);
+    }
+  }
+
+  /// Zeichnet eine berechnete Route als Linie auf der Karte und zentriert
+  /// die Kamera darauf (PROJECT_BRAIN Abschnitt 7).
+  Future<void> _showRoute(RouteResult route) async {
+    final map = _map;
+    if (map == null || route.points.isEmpty) return;
+
+    final geojson = {
+      'type': 'FeatureCollection',
+      'features': [
+        {
+          'type': 'Feature',
+          'properties': {'profile': route.profile},
+          'geometry': {
+            'type': 'LineString',
+            // GeoJSON-Koordinatenreihenfolge: [longitude, latitude].
+            'coordinates': [
+              for (final p in route.points) [p.longitude, p.latitude],
+            ],
+          },
+        },
+      ],
+    };
+
+    if (!_routeLayerAdded) {
+      await map.addSource(
+        _routeSourceId,
+        GeojsonSourceProperties(data: geojson),
+      );
+      // Farbe je Verkehrsmittel, damit auf der Karte erkennbar bleibt,
+      // welches Profil zuletzt berechnet wurde (Fuß = blau, Rad = grün).
+      const colorByProfile = [
+        'match',
+        ['get', 'profile'],
+        'bicycle', '#43A047',
+        '#1E88E5',
+      ];
+      await map.addLineLayer(
+        _routeSourceId,
+        _routeLayerId,
+        const LineLayerProperties(
+          lineColor: colorByProfile,
+          lineWidth: 4,
+          lineCap: 'round',
+          lineJoin: 'round',
+        ),
+      );
+      _routeLayerAdded = true;
+    } else {
+      await map.setGeoJsonSource(_routeSourceId, geojson);
+    }
+
+    try {
+      await map.animateCamera(
+        CameraUpdate.newLatLngBounds(
+          _boundsFor(route.points),
+          left: 32,
+          top: 32,
+          right: 32,
+          bottom: 32,
+        ),
+      );
+    } catch (e) {
+      // Ein Problem beim Kamera-Zoom (z. B. bei einer sehr kurzen Route)
+      // soll die Distanz-/Dauer-Anzeige unten nicht verhindern.
+      debugPrint('Kamera-Anpassung an Route fehlgeschlagen: $e');
+    }
+
+    if (!mounted) return;
+    final km = (route.distanceMeters / 1000).toStringAsFixed(1);
+    final minutes = (route.durationSeconds / 60).round();
+    final modeText = route.profile == 'bicycle' ? 'mit dem Rad' : 'zu Fuß';
+    debugPrint('Route berechnet: $km km, $minutes Min. ($modeText)');
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Route $modeText: $km km, ca. $minutes Min.')),
+    );
+  }
+
+  LatLngBounds _boundsFor(List<LatLng> points) {
+    var minLat = points.first.latitude;
+    var maxLat = points.first.latitude;
+    var minLon = points.first.longitude;
+    var maxLon = points.first.longitude;
+    for (final p in points) {
+      if (p.latitude < minLat) minLat = p.latitude;
+      if (p.latitude > maxLat) maxLat = p.latitude;
+      if (p.longitude < minLon) minLon = p.longitude;
+      if (p.longitude > maxLon) maxLon = p.longitude;
+    }
+    return LatLngBounds(
+      southwest: LatLng(minLat, minLon),
+      northeast: LatLng(maxLat, maxLon),
     );
   }
 
@@ -420,6 +634,26 @@ class _MapScreenState extends State<MapScreen> {
     }
   }
 
+  /// Oeffnet den "Entdecken"-Screen (Phase 7: Context Engine,
+  /// PROJECT_BRAIN Abschnitt 5.3/29) mit den aktuell geladenen POIs,
+  /// dem aktuellen Standort und Wetter. Wird dort eine Route berechnet,
+  /// kommt sie hier zurueck und wird wie beim direkten POI-Tap auf der
+  /// Karte gezeichnet.
+  Future<void> _openDiscover() async {
+    final route = await Navigator.of(context).push<RouteResult>(
+      MaterialPageRoute(
+        builder: (_) => DiscoverScreen(
+          pois: _poiById.values.toList(),
+          position: _location.position,
+          weather: _weather,
+        ),
+      ),
+    );
+    if (route != null) {
+      await _showRoute(route);
+    }
+  }
+
   // --- UI ------------------------------------------------------------------
 
   @override
@@ -427,7 +661,14 @@ class _MapScreenState extends State<MapScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('OPR NOW'),
-        actions: [_buildModeMenu()],
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.explore),
+            tooltip: 'Entdecken - was kann ich jetzt machen?',
+            onPressed: _openDiscover,
+          ),
+          _buildModeMenu(),
+        ],
       ),
       body: Column(
         children: [
@@ -480,6 +721,13 @@ class _MapScreenState extends State<MapScreen> {
             onPressed: _showWholeDistrict,
             tooltip: 'Gesamten Landkreis anzeigen',
             child: const Icon(Icons.zoom_out_map),
+          ),
+          const SizedBox(height: 12),
+          FloatingActionButton.small(
+            heroTag: 'fab-report',
+            onPressed: _openReport,
+            tooltip: 'Meldung erfassen (Phase 8)',
+            child: const Icon(Icons.add_location_alt),
           ),
           const SizedBox(height: 12),
           FloatingActionButton(
