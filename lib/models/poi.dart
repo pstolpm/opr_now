@@ -14,6 +14,7 @@ class Poi {
     required this.category,
     required this.source,
     this.description,
+    this.details,
   });
 
   final String id;
@@ -31,6 +32,11 @@ class Poi {
 
   final String? description;
 
+  /// Zusätzliche, quellenspezifische Detailfelder (z. B. Ausstattung einer
+  /// Badestelle: Parkplatz, WC, Strandbeschaffenheit, Bewertung, ...).
+  /// Optional, da nicht jede Quelle solche Details liefert.
+  final Map<String, String>? details;
+
   /// Erstellt einen [Poi] aus einem GeoJSON-Feature mit Point-Geometrie.
   ///
   /// Erwartet Koordinaten in der GeoJSON-Reihenfolge [longitude, latitude]
@@ -40,6 +46,8 @@ class Poi {
     final coordinates = geometry['coordinates'] as List<dynamic>;
     final properties = feature['properties'] as Map<String, dynamic>? ?? {};
 
+    final rawDetails = properties['details'];
+
     return Poi(
       id: (feature['id'] ?? properties['id']).toString(),
       name: properties['name'] as String? ?? 'Unbenannt',
@@ -48,6 +56,9 @@ class Poi {
       category: properties['category'] as String? ?? 'sonstiges',
       source: properties['source'] as String? ?? 'unbekannt',
       description: properties['description'] as String?,
+      details: rawDetails is Map
+          ? rawDetails.map((key, value) => MapEntry(key.toString(), value.toString()))
+          : null,
     );
   }
 

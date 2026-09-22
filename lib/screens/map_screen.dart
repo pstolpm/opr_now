@@ -20,6 +20,9 @@ import '../services/weather_service.dart';
 import '../utils/constants.dart';
 import '../utils/demo_locations.dart';
 import '../theme/app_theme.dart';
+import '../widgets/legend_panel.dart';
+import '../widgets/scale_bar.dart';
+import '../widgets/zoom_control.dart';
 import 'discover_screen.dart';
 import 'poi_detail_screen.dart';
 import 'report_screen.dart';
@@ -109,6 +112,10 @@ class _MapScreenState extends State<MapScreen> {
   /// UserReport wiederfindet - analog zu _poiById.
   Map<String, UserReport> _reportById = {};
 
+  // --- Kartensteuerung (Design-Ueberarbeitung) ---------------------------
+  /// Ob die Legende (Punktfarben) gerade eingeblendet ist.
+  bool _legendVisible = false;
+
   LocationController get _location => widget.locationController;
 
   @override
@@ -129,6 +136,7 @@ class _MapScreenState extends State<MapScreen> {
     _loadTimer?.cancel();
     _location.removeListener(_onLocationChanged);
     _map?.onFeatureTapped.remove(_onFeatureTapped);
+    _map?.removeListener(_onCameraChanged);
     super.dispose();
   }
 
@@ -137,6 +145,13 @@ class _MapScreenState extends State<MapScreen> {
   void _onMapCreated(MapLibreMapController controller) {
     _map = controller;
     _map!.onFeatureTapped.add(_onFeatureTapped);
+    // Fuer den Massstabsbalken: Kamera-Updates (Zoom/Pan) sollen ein
+    // Neuzeichnen ausloesen (siehe ScaleBar-Widget).
+    _map!.addListener(_onCameraChanged);
+  }
+
+  void _onCameraChanged() {
+    if (mounted) setState(() {});
   }
 
   Future<void> _onStyleLoaded() async {
@@ -651,6 +666,15 @@ class _MapScreenState extends State<MapScreen> {
 
   // --- Aktionen ------------------------------------------------------------
 
+  /// Eine Zoomstufe vergrößern/verkleinern (Zoom-Bedienelement).
+  Future<void> _zoomIn() async {
+    await _map?.animateCamera(CameraUpdate.zoomIn());
+  }
+
+  Future<void> _zoomOut() async {
+    await _map?.animateCamera(CameraUpdate.zoomOut());
+  }
+
   /// Kamera zurück auf den gesamten Landkreis setzen.
   Future<void> _showWholeDistrict() async {
     await _map?.animateCamera(
@@ -738,6 +762,11 @@ class _MapScreenState extends State<MapScreen> {
             tooltip: 'Meldungen als GeoJSON exportieren',
             onPressed: _exportReports,
           ),
+          IconButton(
+            icon: Icon(_legendVisible ? Icons.layers : Icons.layers_outlined),
+            tooltip: 'Legende ein-/ausblenden',
+            onPressed: () => setState(() => _legendVisible = !_legendVisible),
+          ),
           _buildModeMenu(),
         ],
       ),
@@ -762,6 +791,9 @@ class _MapScreenState extends State<MapScreen> {
                   // vereinfacht die Bedienung, "Norden oben" bleibt.
                   rotateGesturesEnabled: false,
                   tiltGesturesEnabled: false,
+                  // Fuer den Massstabsbalken (ScaleBar) wird die aktuelle
+                  // Kameraposition (Zoom, Breitengrad) benoetigt.
+                  trackCameraPosition: true,
                 ),
                 if (!_styleLoaded)
                   Center(
@@ -779,6 +811,22 @@ class _MapScreenState extends State<MapScreen> {
                       failure: _weatherFailure,
                     ),
                   ),
+                if (_styleLoaded)
+                  Positioned(
+                    bottom: 12,
+                    left: 12,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (_legendVisible) ...[
+                          const LegendPanel(),
+                          const SizedBox(height: 8),
+                        ],
+                        ScaleBar(cameraPosition: _map?.cameraPosition),
+                      ],
+                    ),
+                  ),
               ],
             ),
           ),
@@ -787,6 +835,8 @@ class _MapScreenState extends State<MapScreen> {
       floatingActionButton: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
+          ZoomControl(onZoomIn: _zoomIn, onZoomOut: _zoomOut),
+          const SizedBox(height: 12),
           FloatingActionButton.small(
             heroTag: 'fab-district',
             onPressed: _showWholeDistrict,

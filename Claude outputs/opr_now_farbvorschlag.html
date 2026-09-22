@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OPR NOW – Farb- &amp; Design-Vorschlag</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F6F4EE;
+    --panel: #FFFFFF;
+    --text: #22301F;
+    --text-muted: #5B6B57;
+    --border: #E3DFD3;
+
+    --primary: #2F6B4E;
+    --primary-soft: #E4EEE6;
+
+    --gps: #2C7DA0;
+    --demo: #E8A33D;
+
+    --poi-seh: #6B4C82;
+    --poi-natur: #5B8C5A;
+    --poi-bad: #1A8FA3;
+    --poi-gastro: #C1652F;
+    --poi-sonst: #78716C;
+
+    --route-fuss: #8B5E34;
+    --route-rad: #D64550;
+
+    --report: #7A2E3A;
+  }
+  [data-theme="dark"] {
+    --bg: #17211A;
+    --panel: #202B22;
+    --text: #EAF0E6;
+    --text-muted: #A9B8A4;
+    --border: #33422E;
+
+    --primary: #6FBF95;
+    --primary-soft: #24352A;
+
+    --gps: #6FB6DA;
+    --demo: #F2BE6C;
+
+    --poi-seh: #B497CC;
+    --poi-natur: #8FC08B;
+    --poi-bad: #5FC3D6;
+    --poi-gastro: #E79A66;
+    --poi-sonst: #A8A29A;
+
+    --route-fuss: #C39A6C;
+    --route-rad: #F08A93;
+
+    --report: #E28995;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    padding: 24px 16px 64px;
+    transition: background .2s ease, color .2s ease;
+  }
+  .wrap { max-width: 880px; margin: 0 auto; }
+
+  header { margin-bottom: 24px; }
+  h1 { font-size: 24px; font-weight: 700; margin: 0 0 4px; }
+  .subtitle { color: var(--text-muted); font-size: 14px; margin: 0 0 16px; line-height: 1.5; }
+
+  .toggle {
+    display: inline-flex; gap: 4px; padding: 4px;
+    background: var(--panel); border: 1px solid var(--border);
+    border-radius: 999px;
+  }
+  .toggle button {
+    border: none; background: transparent; padding: 8px 16px;
+    border-radius: 999px; font-family: inherit; font-size: 13px; font-weight: 600;
+    color: var(--text-muted); cursor: pointer;
+  }
+  .toggle button.active { background: var(--primary); color: white; }
+
+  section { margin-top: 32px; }
+  h2 { font-size: 15px; font-weight: 600; margin: 0 0 4px; }
+  .section-desc { color: var(--text-muted); font-size: 13px; margin: 0 0 14px; }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
+  .swatch {
+    background: var(--panel); border: 1px solid var(--border); border-radius: 14px;
+    overflow: hidden;
+  }
+  .swatch .chip { height: 56px; }
+  .swatch .info { padding: 10px 12px; }
+  .swatch .name { font-size: 13px; font-weight: 600; margin: 0; }
+  .swatch .hex { font-size: 11px; color: var(--text-muted); margin: 2px 0 0; font-family: monospace; }
+
+  .mock-appbar {
+    background: var(--primary); color: white; border-radius: 16px 16px 0 0;
+    padding: 14px 16px; font-weight: 600; font-size: 16px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .mock-appbar .icons { display: flex; gap: 14px; font-size: 16px; opacity: .95; }
+  .mock-body {
+    background: var(--panel); border: 1px solid var(--border); border-top: none;
+    border-radius: 0 0 16px 16px; padding: 0; position: relative; height: 260px; overflow: hidden;
+  }
+  .mock-map {
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(circle at 20% 30%, var(--primary-soft), transparent 60%),
+      linear-gradient(135deg, #dfeee2 0%, #cfe3d4 100%);
+  }
+  [data-theme="dark"] .mock-map {
+    background:
+      radial-gradient(circle at 20% 30%, var(--primary-soft), transparent 60%),
+      linear-gradient(135deg, #1b2620 0%, #142019 100%);
+  }
+  .dot { position: absolute; width: 16px; height: 16px; border-radius: 50%; border: 2px solid white; box-shadow: 0 1px 3px rgba(0,0,0,.25); }
+  .route-line {
+    position: absolute; height: 4px; border-radius: 4px; transform-origin: left center;
+  }
+  .legend {
+    position: absolute; left: 12px; bottom: 12px; background: var(--panel);
+    border: 1px solid var(--border); border-radius: 12px; padding: 10px 12px;
+    font-size: 11px; box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  }
+  .legend .row { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
+  .legend .row:last-child { margin-bottom: 0; }
+  .legend .sw { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+  .fab {
+    position: absolute; right: 12px; width: 40px; height: 40px; border-radius: 50%;
+    background: var(--panel); border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center; font-size: 16px;
+    box-shadow: 0 2px 6px rgba(0,0,0,.12);
+  }
+  .fab.primary { background: var(--primary); color: white; border: none; }
+  .weather-chip {
+    position: absolute; top: 12px; left: 12px; background: var(--panel);
+    border-radius: 999px; padding: 6px 12px; font-size: 12px; font-weight: 600;
+    box-shadow: 0 2px 6px rgba(0,0,0,.1); display: flex; align-items: center; gap: 6px;
+  }
+
+  .type-sample { background: var(--panel); border: 1px solid var(--border); border-radius: 14px; padding: 18px 20px; }
+  .type-sample .h { font-size: 20px; font-weight: 700; margin: 0 0 6px; }
+  .type-sample .b { font-size: 14px; color: var(--text-muted); margin: 0; line-height: 1.5; }
+
+  .note {
+    margin-top: 28px; font-size: 12px; color: var(--text-muted);
+    border-top: 1px solid var(--border); padding-top: 14px; line-height: 1.6;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>OPR NOW – Farb- &amp; Design-Vorschlag</h1>
+    <p class="subtitle">Natur/Outdoor-Thema mit Poppins als Schriftart. Jede Bedeutungsgruppe (Standort, POI-Kategorie, Route, Meldung) bekommt eine eigene, klar unterscheidbare Farbfamilie – bewusst getrennt von der App-Grundfarbe, damit sich nichts mehr auf der Karte beißt.</p>
+    <div class="toggle">
+      <button id="btn-light" class="active" onclick="setTheme('light')">☀️ Hell</button>
+      <button id="btn-dark" onclick="setTheme('dark')">🌙 Dunkel</button>
+    </div>
+  </header>
+
+  <section>
+    <h2>Vorschau: Kartenscreen mit neuen Farben</h2>
+    <p class="section-desc">Grober Mock der Kernansicht – App-Leiste, Karte mit Standort/POI/Route-Punkten, Legende, Zoom- &amp; Standort-Buttons.</p>
+    <div class="mock-appbar">
+      <span>OPR NOW</span>
+      <span class="icons">🧭 🔍 📤 ⋮</span>
+    </div>
+    <div class="mock-body">
+      <div class="mock-map">
+        <div class="weather-chip">☀️ 21°C</div>
+
+        <div class="route-line" style="left:30%; top:55%; width:38%; background:var(--route-fuss); transform:rotate(-18deg);"></div>
+
+        <div class="dot" style="left:29%; top:53%; background:var(--gps);" title="GPS-Standort"></div>
+        <div class="dot" style="left:62%; top:42%; background:var(--poi-natur);" title="POI: Natur"></div>
+        <div class="dot" style="left:70%; top:60%; background:var(--poi-bad);" title="POI: Badestelle"></div>
+        <div class="dot" style="left:45%; top:25%; background:var(--poi-seh);" title="POI: Sehenswürdigkeit"></div>
+        <div class="dot" style="left:20%; top:70%; background:var(--poi-gastro);" title="POI: Gastronomie"></div>
+        <div class="dot" style="left:55%; top:75%; background:var(--report);" title="Nutzer-Meldung"></div>
+
+        <div class="legend">
+          <div class="row"><span class="sw" style="background:var(--poi-seh)"></span>Sehenswürdigkeit</div>
+          <div class="row"><span class="sw" style="background:var(--poi-natur)"></span>Natur</div>
+          <div class="row"><span class="sw" style="background:var(--poi-bad)"></span>Badestelle</div>
+          <div class="row"><span class="sw" style="background:var(--poi-gastro)"></span>Gastronomie</div>
+          <div class="row"><span class="sw" style="background:var(--report)"></span>Meldung</div>
+        </div>
+
+        <div class="fab" style="bottom:70px;">＋</div>
+        <div class="fab" style="bottom:24px;">－</div>
+        <div class="fab primary" style="bottom:118px;">📍</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Typografie (Poppins)</h2>
+    <div class="type-sample">
+      <p class="h">Schloss Rheinsberg</p>
+      <p class="b">Sehenswürdigkeit · 2,4 km entfernt · ca. 32 Min. zu Fuß. Passt zu deinen Interessen und ist bei aktuellem Wetter gut geeignet.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>App-Grundfarbe</h2>
+    <p class="section-desc">Für App-Leiste, primäre Buttons, ausgewählte Chips – bewusst getrennt von den Punktfarben auf der Karte.</p>
+    <div class="grid">
+      <div class="swatch"><div class="chip" style="background:var(--primary)"></div><div class="info"><p class="name">Primär (Waldgrün)</p><p class="hex" id="hex-primary"></p></div></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Standort-Marker</h2>
+    <div class="grid">
+      <div class="swatch"><div class="chip" style="background:var(--gps)"></div><div class="info"><p class="name">GPS (echt)</p><p class="hex" id="hex-gps"></p></div></div>
+      <div class="swatch"><div class="chip" style="background:var(--demo)"></div><div class="info"><p class="name">Demo-Standort</p><p class="hex" id="hex-demo"></p></div></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>POI-Kategorien</h2>
+    <div class="grid">
+      <div class="swatch"><div class="chip" style="background:var(--poi-seh)"></div><div class="info"><p class="name">Sehenswürdigkeit</p><p class="hex" id="hex-seh"></p></div></div>
+      <div class="swatch"><div class="chip" style="background:var(--poi-natur)"></div><div class="info"><p class="name">Natur</p><p class="hex" id="hex-natur"></p></div></div>
+      <div class="swatch"><div class="chip" style="background:var(--poi-bad)"></div><div class="info"><p class="name">Badestelle</p><p class="hex" id="hex-bad"></p></div></div>
+      <div class="swatch"><div class="chip" style="background:var(--poi-gastro)"></div><div class="info"><p class="name">Gastronomie</p><p class="hex" id="hex-gastro"></p></div></div>
+      <div class="swatch"><div class="chip" style="background:var(--poi-sonst)"></div><div class="info"><p class="name">Sonstiges</p><p class="hex" id="hex-sonst"></p></div></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Route</h2>
+    <p class="section-desc">Fußweg in Wanderweg-Braun (wie Wanderwege auf klassischen Karten), Fahrradroute in Korallrot (angelehnt an Radwegweiser).</p>
+    <div class="grid">
+      <div class="swatch"><div class="chip" style="background:var(--route-fuss)"></div><div class="info"><p class="name">Route: zu Fuß</p><p class="hex" id="hex-fuss"></p></div></div>
+      <div class="swatch"><div class="chip" style="background:var(--route-rad)"></div><div class="info"><p class="name">Route: Fahrrad</p><p class="hex" id="hex-rad"></p></div></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Nutzer-Meldungen</h2>
+    <div class="grid">
+      <div class="swatch"><div class="chip" style="background:var(--report)"></div><div class="info"><p class="name">Meldung</p><p class="hex" id="hex-report"></p></div></div>
+    </div>
+  </section>
+
+  <p class="note">
+    Hinweis: Dies ist nur der Design-Vorschlag zum Freigeben – noch keine Code-Änderung an der App. Sag mir gern, welche Farben/Kategorien noch angepasst werden sollen (z. B. "Gastronomie heller", "Meldung soll auffälliger sein"), dann passe ich die Palette an, bevor ich sie in der App umsetze.
+  </p>
+</div>
+
+<script>
+  function hex(name) {
+    return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  }
+  function updateHexLabels() {
+    const map = {
+      '--primary': 'hex-primary', '--gps': 'hex-gps', '--demo': 'hex-demo',
+      '--poi-seh': 'hex-seh', '--poi-natur': 'hex-natur', '--poi-bad': 'hex-bad',
+      '--poi-gastro': 'hex-gastro', '--poi-sonst': 'hex-sonst',
+      '--route-fuss': 'hex-fuss', '--route-rad': 'hex-rad', '--report': 'hex-report',
+    };
+    for (const [varName, elId] of Object.entries(map)) {
+      const el = document.getElementById(elId);
+      if (el) el.textContent = hex(varName);
+    }
+  }
+  function setTheme(mode) {
+    document.documentElement.setAttribute('data-theme', mode === 'dark' ? 'dark' : 'light');
+    document.getElementById('btn-light').classList.toggle('active', mode !== 'dark');
+    document.getElementById('btn-dark').classList.toggle('active', mode === 'dark');
+    updateHexLabels();
+  }
+  updateHexLabels();
+</script>
+</body>
+</html>

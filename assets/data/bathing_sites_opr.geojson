@@ -1,0 +1,898 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "id": "brandenburg:dranse-dranser-see",
+      "properties": {
+        "name": "Dranse, Dranser See",
+        "category": "badestelle",
+        "source": "brandenburg",
+        "details": {
+          "Letzte Messung": "25.08.2026",
+          "Wassertemperatur": "21,0 °C",
+          "Sichttiefe": "2,0 m",
+          "Wasserqualität": "Ausgezeichnet",
+          "Gewässer": "Dranser See",
+          "Toilette": "nein",
+          "Abfallentsorgung": "ja",
+          "Gastronomie": "nein",
+          "Rettungsschwimmer": "nein",
+          "Betreiber": "Stadt Wittstock",
+          "Website Betreiber": "https://www.wittstock.de/",
+          "Parkplatz": "ja",
+          "Liegewiese": "ja",
+          "Angeln erlaubt": "nein",
+          "Camping erlaubt": "nein",
+          "Spielplatz": "nein",
+          "Grillplatz": "nein",
+          "Wassersport erlaubt": "nein",
+          "Sonstiges": "nein"
+        }
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          12.634717,
+          53.198051
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "brandenburg:zechlinerh-tte-zootzensee",
+      "properties": {
+        "name": "Zechlinerhütte, Zootzensee",
+        "category": "badestelle",
+        "source": "brandenburg",
+        "details": {
+          "Letzte Messung": "26.08.2026",
+          "Wassertemperatur": "20,0 °C",
+          "Sichttiefe": "1,8 m",
+          "Wasserqualität": "Ausgezeichnet",
+          "Gewässer": "Zootzensee",
+          "Bakteriologische Bewertung": "keine Beanstandungen",
+          "Toilette": "nein",
+          "Abfallentsorgung": "ja",
+          "Gastronomie": "nein",
+          "Rettungsschwimmer": "nein",
+          "Strandbeschaffenheit": "kein Strand",
+          "Betreiber": "SV Rheinsberg",
+          "Website Betreiber": "http://www.rheinsberg.de",
+          "Parkplatz": "ja",
+          "Liegewiese": "ja",
+          "Angeln erlaubt": "ja",
+          "Camping erlaubt": "nein",
+          "Spielplatz": "nein",
+          "Grillplatz": "nein",
+          "Wassersport erlaubt": "ja",
+          "Sonstiges": "2 Umkleideräume, TT-Platte, Bänk..."
+        }
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          12.85214799,
+          53.15589122
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "brandenburg:neuruppin-zerm-tzel-zerm-tzelsee",
+      "properties": {
+        "name": "Neuruppin, Zermützel, Zermützelsee",
+        "category": "badestelle",
+        "source": "brandenburg",
+        "details": {
+          "Letzte Messung": "25.08.2026",
+          "Wassertemperatur": "21,0 °C",
+          "Sichttiefe": "0,6 m",
+          "Wasserqualität": "Ausgezeichnet",
+          "Gewässer": "Zermützelsee",
+          "Bakteriologische Bewertung": "keine Beanstandungen",
+          "Toilette": "ja (Trocken- oder Dixitoilette)",
+          "Abfallentsorgung": "ja",
+          "Gastronomie": "nein",
+          "Rettungsschwimmer": "nein",
+          "Strandbeschaffenheit": "kein Strand",
+          "Betreiber": "SV Neuruppin",
+          "Website Betreiber": "http://www.rheinsberg.de",
+          "Parkplatz": "ja",
+          "Liegewiese": "ja",
+          "Angeln erlaubt": "ja",
+          "Camping erlaubt": "nein",
+          "Spielplatz": "ja",
+          "Grillplatz": "nein",
+          "Wassersport erlaubt": "ja"
+        }
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          12.83058544,
+          53.00792039
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "brandenburg:kagar-zermittensee",
+      "properties": {
+        "name": "Kagar, Zermittensee",
+        "category": "badestelle",
+        "source": "brandenburg",
+        "details": {
+          "Letzte Messung": "26.08.2026",
+          "Wassertemperatur": "20,0 °C",
+          "Sichttiefe": "1,6 m",
+          "Wasserqualität": "Ausgezeichnet",
+          "Gewässer": "Zermittensee",
+          "Bakteriologische Bewertung": "keine Beanstandungen",
+          "Toilette": "nein",
+          "Abfallentsorgung": "ja",
+          "Gastronomie": "nein",
+          "Rettungsschwimmer": "nein",
+          "Strandbeschaffenheit": "kein Strand",
+          "Betreiber": "SV Rheinsberg",
+          "Website Betreiber": "http://www.rheinsberg.de",
+          "Parkplatz": "ja",
+          "Liegewiese": "ja",
+          "Angeln erlaubt": "nein",
+          "Camping erlaubt": "nein",
+          "Spielplatz": "nein",
+          "Grillplatz": "nein",
+          "Wassersport erlaubt": "nein",
+          "Sonstiges": "Volleyballplatz, Steg, Umkleide,..."
+        }
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          12.81967029,
+          53.14328884
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "brandenburg:lindow-sch-nbirken-wutzsee",
+      "properties": {
+        "name": "Lindow, Schönbirken, Wutzsee",
+        "category": "badestelle",
+        "source": "brandenburg",
+        "details": {
+          "Letzte Messung": "25.08.2026",
+          "Wassertemperatur": "21,0 °C",
+          "Sichttiefe": "2,0 m",
+          "Wasserqualität": "Ausgezeichnet",
+          "Gewässer": "Wutzsee",
+          "Bakteriologische Bewertung": "keine Beanstandungen",
+          "Toilette": "ja",
+          "Abfallentsorgung": "ja",
+          "Gastronomie": "nein",
+          "Rettungsschwimmer": "nein",
+          "Strandbeschaffenheit": "Sand",
+          "Betreiber": "Amt Lindow",
+          "Website Betreiber": "http://www.amt-lindow-mark.de",
+          "Parkplatz": "ja",
+          "Liegewiese": "nein",
+          "Angeln erlaubt": "nein",
+          "Camping erlaubt": "nein",
+          "Spielplatz": "nein",
+          "Grillplatz": "nein",
+          "Wassersport erlaubt": "nein"
+        }
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          13.00801421,
+          52.96973051
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "brandenburg:kyritz-freibad-untersee",
+      "properties": {
+        "name": "Kyritz, Freibad, Untersee",
+        "category": "badestelle",
+        "source": "brandenburg",
+        "details": {
+          "Letzte Messung": "26.08.2026",
+          "Wassertemperatur": "21,0 °C",
+          "Sichttiefe": "1,0 m",
+          "Wasserqualität": "Ausgezeichnet",
+          "Gewässer": "Untersee",
+          "Bakteriologische Bewertung": "keine Beanstandungen",
+          "Toilette": "ja",
+          "Abfallentsorgung": "ja",
+          "Gastronomie": "ja",
+          "Rettungsschwimmer": "ja",
+          "Strandbeschaffenheit": "Sand",
+          "Betreiber": "Kyritzer Wohnungsbau GmbH",
+          "Website Betreiber": "http://www.kyritzer-wbg.de",
+          "Parkplatz": "ja",
+          "Liegewiese": "ja",
+          "Angeln erlaubt": "ja",
+          "Camping erlaubt": "nein",
+          "Spielplatz": "ja",
+          "Grillplatz": "nein",
+          "Wassersport erlaubt": "ja",
+          "Sonstiges": "Volleyballplatz, Stege, Duschen,..."
+        }
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          12.4453613,
+          52.93944344
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "brandenburg:bantikow-untersee",
+      "properties": {
+        "name": "Bantikow, Untersee",
+        "category": "badestelle",
+        "source": "brandenburg",
+        "details": {
+          "Letzte Messung": "26.08.2026",
+          "Wassertemperatur": "20,0 °C",
+          "Sichttiefe": "1,0 m",
+          "Bemerkungen": "Gefahr der Blaualgenmassenentwic...",
+          "Wasserqualität": "Gut",
+          "Gewässer": "Untersee",
+          "Bakteriologische Bewertung": "keine Beanstandungen",
+          "Toilette": "nein",
+          "Abfallentsorgung": "ja",
+          "Gastronomie": "ja",
+          "Rettungsschwimmer": "nein",
+          "Strandbeschaffenheit": "Wiese",
+          "Betreiber": "Gemeinde Wusterhausen",
+          "Website Betreiber": "http://www.wusterhausen.de",
+          "Parkplatz": "ja",
+          "Liegewiese": "ja",
+          "Angeln erlaubt": "ja",
+          "Camping erlaubt": "nein",
+          "Spielplatz": "ja",
+          "Grillplatz": "nein",
+          "Wassersport erlaubt": "ja",
+          "Sonstiges": "Volleyballplatz, kein Motorsport..."
+        }
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          12.45104518,
+          52.93466495
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "brandenburg:zechlinerh-tte-schlabornsee",
+      "properties": {
+        "name": "Zechlinerhütte, Schlabornsee",
+        "category": "badestelle",
+        "source": "brandenburg",
+        "details": {
+          "Letzte Messung": "26.08.2026",
+          "Wassertemperatur": "°C",
+          "Sichttiefe": "0,9 m",
+          "Wasserqualität": "Ausgezeichnet",
+          "Gewässer": "Schlabornsee",
+          "Bakteriologische Bewertung": "keine Beanstandungen",
+          "Toilette": "ja",
+          "Abfallentsorgung": "ja",
+          "Gastronomie": "nein",
+          "Rettungsschwimmer": "nein",
+          "Strandbeschaffenheit": "kein Strand",
+          "Betreiber": "SV Rheinsberg",
+          "Website Betreiber": "http://www.rheinsberg.de",
+          "Parkplatz": "ja",
+          "Liegewiese": "ja",
+          "Angeln erlaubt": "ja",
+          "Camping erlaubt": "nein",
+          "Spielplatz": "ja",
+          "Grillplatz": "nein",
+          "Wassersport erlaubt": "ja",
+          "Sonstiges": "Steg, Basketballkorb, TT-Platte,..."
+        }
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          12.87821205,
+          53.15057743
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "brandenburg:neuruppin-hotel-waldfrieden-ruppiner-see",
+      "properties": {
+        "name": "Neuruppin,  Hotel Waldfrieden, Ruppiner See",
+        "category": "badestelle",
+        "source": "brandenburg",
+        "details": {
+          "Letzte Messung": "25.08.2026",
+          "Wassertemperatur": "20,0 °C",
+          "Sichttiefe": "0,8 m",
+          "Wasserqualität": "Ausgezeichnet",
+          "Gewässer": "Ruppiner See",
+          "Bakteriologische Bewertung": "keine Beanstandungen",
+          "Toilette": "ja (Trocken- oder Dixitoilette)",
+          "Abfallentsorgung": "ja",
+          "Gastronomie": "ja",
+          "Rettungsschwimmer": "nein",
+          "Strandbeschaffenheit": "kein Strand",
+          "Betreiber": "SV Neuruppin",
+          "Website Betreiber": "http://www.neuruppin.de",
+          "Parkplatz": "ja",
+          "Liegewiese": "ja",
+          "Angeln erlaubt": "ja",
+          "Camping erlaubt": "nein",
+          "Spielplatz": "nein",
+          "Grillplatz": "nein",
+          "Wassersport erlaubt": "ja",
+          "Sonstiges": "Volleyballplatz"
+        }
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          12.82290443,
+          52.91793026
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "brandenburg:neuruppin-ot-altruppin-seebad-ruppiner-see",
+      "properties": {
+        "name": "Neuruppin OT Altruppin, Seebad, Ruppiner See",
+        "category": "badestelle",
+        "source": "brandenburg",
+        "details": {
+          "Letzte Messung": "25.08.2026",
+          "Wassertemperatur": "21,0 °C",
+          "Sichttiefe": "0,8 m",
+          "Wasserqualität": "Ausgezeichnet",
+          "Gewässer": "Ruppiner See",
+          "Bakteriologische Bewertung": "keine Beanstandungen",
+          "Toilette": "ja (Trocken- oder Dixitoilette)",
+          "Abfallentsorgung": "ja",
+          "Gastronomie": "ja",
+          "Rettungsschwimmer": "nein",
+          "Strandbeschaffenheit": "Sand",
+          "Betreiber": "SV Neuruppin",
+          "Website Betreiber": "http://www.neuruppin.de",
+          "Parkplatz": "nein",
+          "Liegewiese": "ja",
+          "Angeln erlaubt": "ja",
+          "Camping erlaubt": "nein",
+          "Spielplatz": "nein",
+          "Grillplatz": "nein",
+          "Wassersport erlaubt": "ja"
+        }
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          12.8402598,
+          52.94431285
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "brandenburg:neuruppin-ot-gnewikow-ruppiner-see",
+      "properties": {
+        "name": "Neuruppin OT Gnewikow, Ruppiner See",
+        "category": "badestelle",
+        "source": "brandenburg",
+        "details": {
+          "Letzte Messung": "25.08.2026",
+          "Wassertemperatur": "20,0 °C",
+          "Sichttiefe": "1,0 m",
+          "Bemerkungen": "Gefahr der Blaualgenmassenentwic...",
+          "Wasserqualität": "Gut",
+          "Gewässer": "Ruppiner See",
+          "Bakteriologische Bewertung": "keine Beanstandungen",
+          "Toilette": "ja (Trocken- oder Dixitoilette)",
+          "Abfallentsorgung": "ja",
+          "Gastronomie": "nein",
+          "Rettungsschwimmer": "nein",
+          "Strandbeschaffenheit": "Sand",
+          "Betreiber": "SV Neuruppin",
+          "Website Betreiber": "http://www.neuruppin.de",
+          "Parkplatz": "ja",
+          "Liegewiese": "ja",
+          "Angeln erlaubt": "ja",
+          "Camping erlaubt": "nein",
+          "Spielplatz": "nein",
+          "Grillplatz": "ja",
+          "Wassersport erlaubt": "ja",
+          "Sonstiges": "Volleyballplatz"
+        }
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          12.82964605,
+          52.88663793
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "brandenburg:neuruppin-jahnbad-ruppiner-see",
+      "properties": {
+        "name": "Neuruppin, Jahnbad, Ruppiner See",
+        "category": "badestelle",
+        "source": "brandenburg",
+        "details": {
+          "Letzte Messung": "25.08.2026",
+          "Wassertemperatur": "22,0 °C",
+          "Sichttiefe": "0,5 m",
+          "Wasserqualität": "Ausgezeichnet",
+          "Gewässer": "Ruppiner See",
+          "Bakteriologische Bewertung": "keine Beanstandungen",
+          "Toilette": "ja",
+          "Abfallentsorgung": "ja",
+          "Gastronomie": "ja",
+          "Rettungsschwimmer": "ja",
+          "Strandbeschaffenheit": "Sand",
+          "Betreiber": "SV Neuruppin",
+          "Website Betreiber": "http://www.neuruppin.de",
+          "Parkplatz": "ja",
+          "Liegewiese": "ja",
+          "Angeln erlaubt": "nein",
+          "Camping erlaubt": "nein",
+          "Spielplatz": "ja",
+          "Grillplatz": "nein",
+          "Wassersport erlaubt": "ja",
+          "Sonstiges": "Volleyball, Strandkörbe, Stege, ..."
+        }
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          12.82484995,
+          52.93609238
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "brandenburg:wustrau-am-schlo-ruppiner-see",
+      "properties": {
+        "name": "Wustrau, Am Schloß, Ruppiner See",
+        "category": "badestelle",
+        "source": "brandenburg",
+        "details": {
+          "Letzte Messung": "25.08.2026",
+          "Wassertemperatur": "20,0 °C",
+          "Sichttiefe": "0,6 m",
+          "Wasserqualität": "Ausgezeichnet",
+          "Gewässer": "Ruppiner See",
+          "Bakteriologische Bewertung": "keine Beanstandungen",
+          "Toilette": "ja (Trocken- oder Dixitoilette)",
+          "Abfallentsorgung": "ja",
+          "Gastronomie": "nein",
+          "Rettungsschwimmer": "nein",
+          "Strandbeschaffenheit": "Sand",
+          "Betreiber": "Amt Fehrbellin",
+          "Website Betreiber": "http://www.fehrbellin.de",
+          "Parkplatz": "ja",
+          "Liegewiese": "ja",
+          "Angeln erlaubt": "ja",
+          "Camping erlaubt": "nein",
+          "Spielplatz": "ja",
+          "Grillplatz": "nein",
+          "Wassersport erlaubt": "ja",
+          "Sonstiges": "Steg"
+        }
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          12.86627371,
+          52.85059928
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "brandenburg:neuruppin-ot-molchow-molchowsee",
+      "properties": {
+        "name": "Neuruppin OT Molchow, Molchowsee",
+        "category": "badestelle",
+        "source": "brandenburg",
+        "details": {
+          "Letzte Messung": "25.08.2026",
+          "Wassertemperatur": "20,0 °C",
+          "Sichttiefe": "0,5 m",
+          "Wasserqualität": "Ausgezeichnet",
+          "Gewässer": "Molchowsee",
+          "Bakteriologische Bewertung": "keine Beanstandungen",
+          "Toilette": "ja (Trocken- oder Dixitoilette)",
+          "Abfallentsorgung": "ja",
+          "Gastronomie": "nein",
+          "Rettungsschwimmer": "nein",
+          "Strandbeschaffenheit": "kein Strand",
+          "Betreiber": "SV Neuruppin",
+          "Website Betreiber": "http://www.neuruppin.de",
+          "Parkplatz": "nein",
+          "Liegewiese": "ja",
+          "Angeln erlaubt": "ja",
+          "Camping erlaubt": "nein",
+          "Spielplatz": "nein",
+          "Grillplatz": "nein",
+          "Wassersport erlaubt": "ja"
+        }
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          12.83157892,
+          52.97293572
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "brandenburg:k-nigsberg-k-nigsberger-see",
+      "properties": {
+        "name": "Königsberg, Königsberger See",
+        "category": "badestelle",
+        "source": "brandenburg",
+        "details": {
+          "Letzte Messung": "26.08.2026",
+          "Wassertemperatur": "20,0 °C",
+          "Sichttiefe": "0,5 m",
+          "Wasserqualität": "Ausgezeichnet",
+          "Gewässer": "Königsberger See",
+          "Bakteriologische Bewertung": "keine Beanstandungen",
+          "Toilette": "ja",
+          "Abfallentsorgung": "ja",
+          "Gastronomie": "ja",
+          "Rettungsschwimmer": "nein",
+          "Strandbeschaffenheit": "Wiese",
+          "Betreiber": "Gemeinde Heiligengrabe",
+          "Website Betreiber": "http://www.heiligengrabe.de",
+          "Parkplatz": "ja",
+          "Liegewiese": "ja",
+          "Angeln erlaubt": "ja",
+          "Camping erlaubt": "ja",
+          "Spielplatz": "ja",
+          "Grillplatz": "ja",
+          "Wassersport erlaubt": "ja",
+          "Sonstiges": "Klettergerüst,  Sandkasten, kein..."
+        }
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          12.43689221,
+          53.05388986
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "brandenburg:wusterhausen-freibad-klempowsee",
+      "properties": {
+        "name": "Wusterhausen, Freibad, Klempowsee",
+        "category": "badestelle",
+        "source": "brandenburg",
+        "details": {
+          "Letzte Messung": "26.08.2026",
+          "Wassertemperatur": "20,0 °C",
+          "Sichttiefe": "1,1 m",
+          "Wasserqualität": "Ausgezeichnet",
+          "Gewässer": "Klempowsee",
+          "Bakteriologische Bewertung": "keine Beanstandungen",
+          "Toilette": "ja",
+          "Abfallentsorgung": "ja",
+          "Gastronomie": "ja",
+          "Rettungsschwimmer": "ja",
+          "Strandbeschaffenheit": "Sand",
+          "Betreiber": "Gemeinde Wusterhausen",
+          "Website Betreiber": "http://www.wusterhausen.de",
+          "Parkplatz": "ja",
+          "Liegewiese": "ja",
+          "Angeln erlaubt": "ja",
+          "Camping erlaubt": "nein",
+          "Spielplatz": "ja",
+          "Grillplatz": "nein",
+          "Wassersport erlaubt": "ja",
+          "Sonstiges": "Volleyball, Tischtennis, Stege, ..."
+        }
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          12.45737176,
+          52.9034186
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "brandenburg:kleinzerlang-kleiner-p-litzsee",
+      "properties": {
+        "name": "Kleinzerlang, Kleiner Pälitzsee",
+        "category": "badestelle",
+        "source": "brandenburg",
+        "details": {
+          "Letzte Messung": "26.08.2026",
+          "Wassertemperatur": "20,0 °C",
+          "Sichttiefe": "0,9 m",
+          "Wasserqualität": "Ausgezeichnet",
+          "Gewässer": "Kleiner Pälitzsee",
+          "Bakteriologische Bewertung": "keine Beanstandungen",
+          "Toilette": "ja",
+          "Abfallentsorgung": "ja",
+          "Gastronomie": "ja",
+          "Rettungsschwimmer": "nein",
+          "Strandbeschaffenheit": "kein Strand",
+          "Betreiber": "SV Rheinsberg",
+          "Website Betreiber": "http://www.rheinsberg.de",
+          "Parkplatz": "ja",
+          "Liegewiese": "ja",
+          "Angeln erlaubt": "ja",
+          "Camping erlaubt": "nein",
+          "Spielplatz": "ja",
+          "Grillplatz": "nein",
+          "Wassersport erlaubt": "ja",
+          "Sonstiges": "Stege, Basketballkorb, Inselsteg..."
+        }
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          12.93056637,
+          53.19265897
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "brandenburg:binenwalde-kalksee",
+      "properties": {
+        "name": "Binenwalde, Kalksee",
+        "category": "badestelle",
+        "source": "brandenburg",
+        "details": {
+          "Letzte Messung": "26.08.2026",
+          "Wassertemperatur": "21,0 °C",
+          "Sichttiefe": "2,0 m",
+          "Wasserqualität": "Ausgezeichnet",
+          "Gewässer": "Kalksee",
+          "Bakteriologische Bewertung": "keine Beanstandungen",
+          "Toilette": "ja (Trocken- oder Dixitoilette)",
+          "Abfallentsorgung": "ja",
+          "Gastronomie": "nein",
+          "Rettungsschwimmer": "nein",
+          "Strandbeschaffenheit": "Sand",
+          "Betreiber": "SV Neuruppin",
+          "Website Betreiber": "http://www.neuruppin.de",
+          "Parkplatz": "ja",
+          "Liegewiese": "nein",
+          "Angeln erlaubt": "ja",
+          "Camping erlaubt": "nein",
+          "Spielplatz": "nein",
+          "Grillplatz": "nein",
+          "Wassersport erlaubt": "ja",
+          "Sonstiges": "kein Motorsport, Rettungsring, B..."
+        }
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          12.80253241,
+          53.04720022
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "brandenburg:lindow-gudelacksee",
+      "properties": {
+        "name": "Lindow, Gudelacksee",
+        "category": "badestelle",
+        "source": "brandenburg",
+        "details": {
+          "Letzte Messung": "25.08.2026",
+          "Wassertemperatur": "21,0 °C",
+          "Sichttiefe": "1,8 m",
+          "Wasserqualität": "Ausgezeichnet",
+          "Gewässer": "Gudelacksee",
+          "Bakteriologische Bewertung": "keine Beanstandungen",
+          "Toilette": "ja",
+          "Abfallentsorgung": "ja",
+          "Gastronomie": "ja",
+          "Rettungsschwimmer": "nein",
+          "Strandbeschaffenheit": "Grünstrand",
+          "Betreiber": "Amt  Lindow",
+          "Website Betreiber": "http://www.lindow-mark.de",
+          "Parkplatz": "ja",
+          "Liegewiese": "ja",
+          "Angeln erlaubt": "ja",
+          "Camping erlaubt": "ja",
+          "Spielplatz": "ja",
+          "Grillplatz": "nein",
+          "Wassersport erlaubt": "ja",
+          "Sonstiges": "Campingplatz direkt neben der Ba..."
+        }
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          12.98232225,
+          52.97424212
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "brandenburg:flecken-zechlin-an-der-alten-schneidem-hle-gro-er-zechliner-see",
+      "properties": {
+        "name": "Flecken Zechlin, An der alten Schneidemühle, Großer Zechliner See",
+        "category": "badestelle",
+        "source": "brandenburg",
+        "details": {
+          "Letzte Messung": "25.08.2026",
+          "Wassertemperatur": "20,0 °C",
+          "Sichttiefe": "2,0 m",
+          "Wasserqualität": "Ausgezeichnet",
+          "Gewässer": "Großer Zechliner See",
+          "Bakteriologische Bewertung": "keine Beanstandungen",
+          "Toilette": "nein",
+          "Abfallentsorgung": "ja",
+          "Gastronomie": "nein",
+          "Rettungsschwimmer": "nein",
+          "Strandbeschaffenheit": "Wiese",
+          "Betreiber": "SV Rheinsberg",
+          "Website Betreiber": "http://www.rheinsberg.de",
+          "Parkplatz": "ja",
+          "Liegewiese": "ja",
+          "Angeln erlaubt": "ja",
+          "Camping erlaubt": "nein",
+          "Spielplatz": "ja",
+          "Grillplatz": "nein",
+          "Wassersport erlaubt": "ja",
+          "Sonstiges": "Steg, Wanderhütte, Volleyballpla..."
+        }
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          12.7868,
+          53.15347
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "brandenburg:kleinzerlang-gro-er-prebelowsee",
+      "properties": {
+        "name": "Kleinzerlang, Großer Prebelowsee",
+        "category": "badestelle",
+        "source": "brandenburg",
+        "details": {
+          "Letzte Messung": "26.08.2026",
+          "Wassertemperatur": "20,0 °C",
+          "Sichttiefe": "0,7 m",
+          "Bemerkungen": "Badesteganlage für Nutzung aus s...",
+          "Wasserqualität": "Ausgezeichnet",
+          "Gewässer": "Großer Prebelowsee",
+          "Bakteriologische Bewertung": "keine Beanstandungen",
+          "Toilette": "nein",
+          "Abfallentsorgung": "ja",
+          "Gastronomie": "nein",
+          "Rettungsschwimmer": "nein",
+          "Strandbeschaffenheit": "Sand",
+          "Betreiber": "SV Rheinsberg",
+          "Website Betreiber": "http://www.rheinsberg.de",
+          "Parkplatz": "nein",
+          "Liegewiese": "ja",
+          "Angeln erlaubt": "ja",
+          "Camping erlaubt": "nein",
+          "Spielplatz": "nein",
+          "Grillplatz": "nein",
+          "Wassersport erlaubt": "ja"
+        }
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          12.88558347,
+          53.1801268
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "brandenburg:rheinsberg-grienericksee",
+      "properties": {
+        "name": "Rheinsberg, Grienericksee",
+        "category": "badestelle",
+        "source": "brandenburg",
+        "details": {
+          "Letzte Messung": "26.08.2026",
+          "Wassertemperatur": "20,0 °C",
+          "Sichttiefe": "1,1 m",
+          "Wasserqualität": "Ausgezeichnet",
+          "Gewässer": "Grienericksee",
+          "Bakteriologische Bewertung": "keine Beanstandungen",
+          "Toilette": "ja",
+          "Abfallentsorgung": "ja",
+          "Gastronomie": "ja",
+          "Rettungsschwimmer": "ja",
+          "Strandbeschaffenheit": "Kies",
+          "Betreiber": "Marineclub  Rheinsberg",
+          "Website Betreiber": "http://marineclub-rheinsberg.de/...",
+          "Parkplatz": "ja",
+          "Liegewiese": "ja",
+          "Angeln erlaubt": "nein",
+          "Camping erlaubt": "nein",
+          "Spielplatz": "ja",
+          "Grillplatz": "nein",
+          "Wassersport erlaubt": "ja",
+          "Sonstiges": "Stege, Inselsteg mit kleiner Was..."
+        }
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          12.89250408,
+          53.10885263
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "brandenburg:schweinrich-dranser-see",
+      "properties": {
+        "name": "Schweinrich, Dranser See",
+        "category": "badestelle",
+        "source": "brandenburg",
+        "details": {
+          "Letzte Messung": "25.08.2026",
+          "Wassertemperatur": "19,0 °C",
+          "Sichttiefe": "2,0 m",
+          "Wasserqualität": "Ausgezeichnet",
+          "Gewässer": "Dranser See",
+          "Bakteriologische Bewertung": "keine Beanstandungen",
+          "Toilette": "ja",
+          "Abfallentsorgung": "ja",
+          "Gastronomie": "nein",
+          "Rettungsschwimmer": "nein",
+          "Strandbeschaffenheit": "kein Strand",
+          "Betreiber": "SV Wittstock",
+          "Website Betreiber": "http://www.wittstock.de/",
+          "Parkplatz": "ja",
+          "Liegewiese": "ja",
+          "Angeln erlaubt": "ja",
+          "Camping erlaubt": "nein",
+          "Spielplatz": "ja",
+          "Grillplatz": "nein",
+          "Wassersport erlaubt": "ja",
+          "Sonstiges": "Volleyballplatz, TT-Platte, Bade..."
+        }
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          12.63146295,
+          53.17996474
+        ]
+      }
+    }
+  ]
+}
