@@ -24,6 +24,7 @@ import '../widgets/legend_panel.dart';
 import '../widgets/scale_bar.dart';
 import '../widgets/zoom_control.dart';
 import 'discover_screen.dart';
+import 'info_screen.dart';
 import 'poi_detail_screen.dart';
 import 'report_screen.dart';
 
@@ -766,6 +767,13 @@ class _MapScreenState extends State<MapScreen> {
             icon: Icon(_legendVisible ? Icons.layers : Icons.layers_outlined),
             tooltip: 'Legende ein-/ausblenden',
             onPressed: () => setState(() => _legendVisible = !_legendVisible),
+          ),
+          IconButton(
+            icon: const Icon(Icons.info_outline),
+            tooltip: 'Über OPR NOW',
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const InfoScreen()),
+            ),
           ),
           _buildModeMenu(),
         ],
