@@ -24,6 +24,7 @@ import '../widgets/legend_panel.dart';
 import '../widgets/scale_bar.dart';
 import '../widgets/zoom_control.dart';
 import 'discover_screen.dart';
+import '../models/tour_route_result.dart';
 import 'info_screen.dart';
 import 'poi_detail_screen.dart';
 import 'report_screen.dart';
@@ -100,6 +101,20 @@ class _MapScreenState extends State<MapScreen> {
   static const _routeLayerId = 'route-line';
   bool _routeLayerAdded = false;
   final _geofence = GeofenceLogic();
+
+  // --- Rundtour (vorgezogene Erweiterung, PROJECT_BRAIN Abschnitt 23) ----
+  /// Verbleibende Ziele einer aktiven Rundtour (nach dem aktuellen
+  /// Geofence-Ziel), in Besuchsreihenfolge - inkl. abschliessendem
+  /// Rueckweg zum Start.
+  final List<LatLng> _tourQueue = [];
+  final List<String> _tourQueueLabels = [];
+
+  /// Anzeigename des aktuell aktiven Geofence-Ziels (fuer die
+  /// "X erreicht, weiter zu Y"-Meldung).
+  String? _activeTourLabel;
+
+  /// Ob gerade eine Rundtour laeuft (fuer die Abschlussmeldung).
+  bool _tourActive = false;
 
   // --- Nutzer-Meldungen (Phase 8) -----------------------------------------
   static const _reportSourceId = 'user-reports';
@@ -488,7 +503,12 @@ class _MapScreenState extends State<MapScreen> {
 
     // Geofence (Phase 10, PROJECT_BRAIN Abschnitt 8) automatisch auf das
     // Routenziel aktivieren - sobald eine Route laeuft, soll die App bei
-    // Ankunft benachrichtigen.
+    // Ankunft benachrichtigen. Eine evtl. noch aktive Rundtour-
+    // Zielkette (siehe _showTourRoute) wird dabei verworfen.
+    _tourActive = false;
+    _activeTourLabel = null;
+    _tourQueue.clear();
+    _tourQueueLabels.clear();
     _geofence.setTarget(route.points.last);
 
     if (!mounted) return;
@@ -498,6 +518,123 @@ class _MapScreenState extends State<MapScreen> {
     debugPrint('Route berechnet: $km km, $minutes Min. ($modeText)');
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Route $modeText: $km km, ca. $minutes Min.')),
+    );
+  }
+
+  /// Zeichnet die Etappen einer gestarteten Rundtour als durchgehende
+  /// Linie auf der Karte (gleiche Farblogik wie eine Einzelroute, siehe
+  /// [_showRoute]) und baut die Geofence-Zielkette auf: das erste Ziel
+  /// wird sofort aktiv, die weiteren Stopps (inkl. abschliessendem
+  /// Rueckweg zum Start) werden in [_tourQueue] vorgemerkt und in
+  /// [_checkGeofence] nacheinander aktiviert (mit dem Nutzer
+  /// abgestimmt: automatischer Fortschritt zum naechsten Stopp).
+  Future<void> _showTourRoute(TourRouteResult tour) async {
+    final map = _map;
+    if (map == null || tour.legs.isEmpty) return;
+    // Vor dem ersten 'await' lesen (lint use_build_context_synchronously).
+    final brightness = Theme.of(context).brightness;
+
+    final allPoints = <LatLng>[
+      for (final leg in tour.legs) ...leg.points,
+    ];
+    if (allPoints.isEmpty) return;
+
+    final profile = tour.legs.first.profile;
+    final geojson = {
+      'type': 'FeatureCollection',
+      'features': [
+        {
+          'type': 'Feature',
+          'properties': {'profile': profile},
+          'geometry': {
+            'type': 'LineString',
+            'coordinates': [
+              for (final p in allPoints) [p.longitude, p.latitude],
+            ],
+          },
+        },
+      ],
+    };
+
+    if (!_routeLayerAdded) {
+      await map.addSource(
+        _routeSourceId,
+        GeojsonSourceProperties(data: geojson),
+      );
+      final colorByProfile = [
+        'match',
+        ['get', 'profile'],
+        'bicycle', MapColors.routeRad(brightness),
+        MapColors.routeFuss(brightness),
+      ];
+      await map.addLineLayer(
+        _routeSourceId,
+        _routeLayerId,
+        LineLayerProperties(
+          lineColor: colorByProfile,
+          lineWidth: 4,
+          lineCap: 'round',
+          lineJoin: 'round',
+        ),
+      );
+      _routeLayerAdded = true;
+    } else {
+      await map.setGeoJsonSource(_routeSourceId, geojson);
+    }
+
+    try {
+      await map.animateCamera(
+        CameraUpdate.newLatLngBounds(
+          _boundsFor(allPoints),
+          left: 32,
+          top: 32,
+          right: 32,
+          bottom: 32,
+        ),
+      );
+    } catch (e) {
+      debugPrint('Kamera-Anpassung an Rundtour fehlgeschlagen: $e');
+    }
+
+    // Geofence-Kette aufbauen: erstes Ziel sofort aktiv, restliche Ziele
+    // (weitere Stopps + abschliessender Rueckweg zum Start) vorgemerkt.
+    final targets = [for (final leg in tour.legs) leg.points.last];
+    final labels = [
+      ...tour.stopNames,
+      'Start (Rundtour abgeschlossen)',
+    ];
+
+    _tourActive = true;
+    _activeTourLabel = labels.first;
+    _geofence.setTarget(targets.first);
+    _tourQueue
+      ..clear()
+      ..addAll(targets.skip(1));
+    _tourQueueLabels
+      ..clear()
+      ..addAll(labels.skip(1));
+
+    if (!mounted) return;
+    final totalKm = (tour.legs.fold<double>(
+                  0,
+                  (sum, leg) => sum + leg.distanceMeters,
+                ) /
+                1000)
+        .toStringAsFixed(1);
+    final totalMinutes = (tour.legs.fold<double>(
+                  0,
+                  (sum, leg) => sum + leg.durationSeconds,
+                ) /
+                60)
+        .round();
+    final modeText = profile == 'bicycle' ? 'mit dem Rad' : 'zu Fuß';
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          'Rundtour $modeText: ${tour.stopNames.length} Stopps, '
+          '$totalKm km, ca. $totalMinutes Min.',
+        ),
+      ),
     );
   }
 
@@ -561,14 +698,39 @@ class _MapScreenState extends State<MapScreen> {
 
   /// Benachrichtigt, sobald die Position erstmals innerhalb des
   /// Geofence-Schwellenwerts um das aktive Routenziel liegt (Phase 10).
+  ///
+  /// Bei einer laufenden Rundtour (Rundtour-Funktion, mit dem Nutzer
+  /// als "automatisch zum naechsten Stopp" abgestimmt) wird hier
+  /// zusaetzlich der naechste Stopp aus [_tourQueue] aktiviert, bis die
+  /// Kette (inkl. abschliessendem Rueckweg zum Start) abgearbeitet ist.
   void _checkGeofence(UserPosition position) {
     if (!_geofence.checkArrival(position)) return;
     if (!mounted) return;
+
+    if (_tourQueue.isNotEmpty) {
+      final reachedLabel = _activeTourLabel;
+      final nextTarget = _tourQueue.removeAt(0);
+      final nextLabel = _tourQueueLabels.removeAt(0);
+      _activeTourLabel = nextLabel;
+      _geofence.setTarget(nextTarget);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            reachedLabel != null
+                ? '$reachedLabel erreicht! Weiter zu $nextLabel.'
+                : 'Ziel erreicht! Weiter zu $nextLabel.',
+          ),
+          duration: const Duration(seconds: 5),
+        ),
+      );
+      return;
+    }
+
+    final message = _tourActive ? 'Rundtour abgeschlossen!' : 'Ziel erreicht!';
+    _tourActive = false;
+    _activeTourLabel = null;
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Ziel erreicht!'),
-        duration: Duration(seconds: 5),
-      ),
+      SnackBar(content: Text(message), duration: const Duration(seconds: 5)),
     );
   }
 
@@ -703,7 +865,10 @@ class _MapScreenState extends State<MapScreen> {
   /// kommt sie hier zurueck und wird wie beim direkten POI-Tap auf der
   /// Karte gezeichnet.
   Future<void> _openDiscover() async {
-    final route = await Navigator.of(context).push<RouteResult>(
+    // Object statt RouteResult: die Entdecken-Seite kann sowohl eine
+    // Einzelroute (RouteResult) als auch eine gestartete Rundtour
+    // (TourRouteResult) zurueckgeben (Rundtour-Funktion).
+    final result = await Navigator.of(context).push<Object>(
       MaterialPageRoute(
         builder: (_) => DiscoverScreen(
           pois: _poiById.values.toList(),
@@ -712,8 +877,10 @@ class _MapScreenState extends State<MapScreen> {
         ),
       ),
     );
-    if (route != null) {
-      await _showRoute(route);
+    if (result is RouteResult) {
+      await _showRoute(result);
+    } else if (result is TourRouteResult) {
+      await _showTourRoute(result);
     }
   }
 

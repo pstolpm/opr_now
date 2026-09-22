@@ -22,9 +22,11 @@ class ContextEngine {
 
   /// Angenommene Durchschnittsgeschwindigkeiten fuer die Zeitschaetzung.
   /// Grobe Richtwerte inkl. kleinerer Pausen/Umwege, keine exakte
-  /// Routing-Geschwindigkeit.
-  static const _walkingSpeedMetersPerSecond = 1.25; // ~ 4,5 km/h
-  static const _cyclingSpeedMetersPerSecond = 4.17; // ~ 15 km/h
+  /// Routing-Geschwindigkeit. Oeffentlich, weil auch der TourPlanner
+  /// (Rundtour-Funktion) dieselben Richtwerte fuer seine Etappen-
+  /// Schaetzungen verwendet.
+  static const walkingSpeedMetersPerSecond = 1.25; // ~ 4,5 km/h
+  static const cyclingSpeedMetersPerSecond = 4.17; // ~ 15 km/h
 
   /// Distanz, ab der [_distanceScore] auf 0 sinkt (Skalierungsgrenze,
   /// keine harte Ausschlussgrenze - der Zeitbudget-Filter uebernimmt das
@@ -58,8 +60,8 @@ class ContextEngine {
     WeatherContext? weather,
   }) {
     final speed = mobility == 'bicycle'
-        ? _cyclingSpeedMetersPerSecond
-        : _walkingSpeedMetersPerSecond;
+        ? cyclingSpeedMetersPerSecond
+        : walkingSpeedMetersPerSecond;
 
     final results = <Recommendation>[];
     for (final poi in pois) {

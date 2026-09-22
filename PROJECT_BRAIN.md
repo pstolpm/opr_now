@@ -1097,7 +1097,16 @@ Start
 → Start
 ```
 
-**Entscheidung (nach Phase 7):** Falls umgesetzt, ebenfalls regelbasiert (z. B. einfache Greedy-Heuristik: bestbewerteter POI aus der Context Engine, der noch ins Zeitbudget passt, davon Reisezeit abziehen, wiederholen), keine KI/ML-Lösung - konsistent mit Abschnitt 6 und 24. Wird erst nach stabilem MVP (Phase 8-13) angegangen (Regel 4).
+**Status: umgesetzt** (vorgezogen nach der Design-Überarbeitung, auf ausdrücklichen Nutzerwunsch, vor Phase 11–13). Implementiert als regelbasierter Greedy-Algorithmus (keine KI/ML, konsistent mit Abschnitt 6 und 24) in `lib/logic/tour_planner.dart` (`TourPlanner`): von der aktuellen Position aus wird über die Context Engine der bestbewertete, noch nicht besuchte POI gesucht, der – inklusive Rückweg zum ursprünglichen Startpunkt – noch ins Zeitbudget passt; Wiederholung, bis maximal 4 Stopps erreicht sind, kein POI mehr passt oder keine POIs mehr übrig sind.
+
+Mit dem Nutzer abgestimmte Eckpunkte:
+
+- Rundtour führt immer mit Rückweg zum Start zurück (kein offenes Ende)
+- maximal 4 Stopps pro Rundtour
+- Einstieg über einen Modus-Umschalter ("Einzelziel"/"Rundtour") im bestehenden "Entdecken"-Screen (`lib/screens/discover_screen.dart`)
+- der Geofence aktiviert bei Ankunft automatisch das nächste Ziel der Kette (inkl. Rückweg), bis die Rundtour abgeschlossen ist (`lib/screens/map_screen.dart`, `_tourQueue`/`_checkGeofence`)
+
+Die tatsächliche Route je Etappe wird erst beim Start der Tour über Valhalla berechnet (`lib/models/tour_route_result.dart`).
 
 ---
 
@@ -2182,7 +2191,7 @@ Diese Punkte sind noch nicht final festgelegt und sollen während der Umsetzung 
 [ ] Form der Overture-Extraktion
 [ ] Umfang der Offline-Funktion
 [ ] Verwendung von Fotos bei Nutzer-Meldungen
-[ ] genaue UI-Gestaltung
+[x] genaue UI-Gestaltung (Design-Überarbeitung): Natur/Outdoor-Thema, Waldgrün als Seed-Farbe (`lib/theme/app_theme.dart`), Schriftart Poppins, Light/Dark Mode (folgt Systemeinstellung), eigenes `MapColors`-System für Kartenpunktfarben (getrennt von der UI-Grundfarbe), Kartenkontrollen (Zoom +/-, Legende, selbst gebauter Maßstabsbalken, da `scaleControlEnabled` nur auf Web funktioniert), "Über"-Seite mit Projektbeschreibung, Datenquellen/Attribution und FAQ (`lib/screens/info_screen.dart`).
 ```
 
 Coding Agents dürfen diese Punkte nicht ohne Begründung als bereits entschieden behandeln.
