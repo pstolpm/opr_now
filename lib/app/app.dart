@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../screens/map_screen.dart';
 import '../services/location_controller.dart';
 import '../services/location_source.dart';
+import '../theme/app_theme.dart';
 
 /// Wurzel-Widget von OPR NOW.
 ///
@@ -39,9 +40,11 @@ class _OprNowAppState extends State<OprNowApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'OPR NOW',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.teal),
-      ),
+      theme: AppTheme.light(),
+      darkTheme: AppTheme.dark(),
+      // Folgt der System-Einstellung des Geraets (Nutzerentscheidung:
+      // Dark Mode gleich mit einplanen, siehe PROJECT_BRAIN-Historie).
+      themeMode: ThemeMode.system,
       home: MapScreen(locationController: _locationController),
     );
   }

@@ -53,6 +53,10 @@ dependencies:
   # Android-Share-Dialog zum Speichern/Versenden der exportierten Datei - Phase 9
   share_plus: ^13.3.0
 
+  # App-Design: Poppins-Schriftart (Google Fonts, mit lokalem Cache nach
+  # dem ersten Laden - siehe lib/theme/app_theme.dart)
+  google_fonts: ^8.2.1
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

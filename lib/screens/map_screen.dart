@@ -19,6 +19,7 @@ import '../services/overpass_service.dart';
 import '../services/weather_service.dart';
 import '../utils/constants.dart';
 import '../utils/demo_locations.dart';
+import '../theme/app_theme.dart';
 import 'discover_screen.dart';
 import 'poi_detail_screen.dart';
 import 'report_screen.dart';
@@ -160,6 +161,9 @@ class _MapScreenState extends State<MapScreen> {
   Future<void> _addUserLocationLayers() async {
     final map = _map;
     if (map == null) return;
+    // Vor dem ersten 'await' lesen (lint use_build_context_synchronously):
+    // context bleibt bis dahin garantiert gueltig.
+    final brightness = Theme.of(context).brightness;
 
     await map.addSource(
       _userSourceId,
@@ -168,18 +172,18 @@ class _MapScreenState extends State<MapScreen> {
       ),
     );
 
-    const colorBySource = [
+    final colorBySource = [
       'match',
       ['get', 'source'],
       'demo',
-      '#FB8C00', // orange
-      '#1E88E5', // blau
+      MapColors.demo(brightness),
+      MapColors.gps(brightness),
     ];
 
     await map.addCircleLayer(
       _userSourceId,
       _userHaloLayerId,
-      const CircleLayerProperties(
+      CircleLayerProperties(
         circleRadius: 16,
         circleColor: colorBySource,
         circleOpacity: 0.25,
@@ -188,7 +192,7 @@ class _MapScreenState extends State<MapScreen> {
     await map.addCircleLayer(
       _userSourceId,
       _userDotLayerId,
-      const CircleLayerProperties(
+      CircleLayerProperties(
         circleRadius: 7,
         circleColor: colorBySource,
         circleStrokeWidth: 2.5,
@@ -205,6 +209,8 @@ class _MapScreenState extends State<MapScreen> {
   Future<void> _loadAndShowPois() async {
     final map = _map;
     if (map == null) return;
+    // Vor dem ersten 'await' lesen (lint use_build_context_synchronously).
+    final brightness = Theme.of(context).brightness;
 
     // Echte POIs aus OpenStreetMap/Overpass (Phase 5), begrenzt auf den
     // Landkreis OPR. Ist Overpass nicht erreichbar oder liefert nichts,
@@ -260,20 +266,20 @@ class _MapScreenState extends State<MapScreen> {
     // Farbe je Kategorie (MapLibre-Expression, PROJECT_BRAIN Abschnitt 34/
     // "genaue UI-Gestaltung" ist offen, siehe Abschnitt 48 – vorläufige,
     // klar unterscheidbare Testfarben).
-    const colorByCategory = [
+    final colorByCategory = [
       'match',
       ['get', 'category'],
-      'sehenswuerdigkeit', '#8E24AA', // lila
-      'natur', '#43A047', // grün
-      'badestelle', '#039BE5', // hellblau
-      'gastronomie', '#F4511E', // orange-rot
-      '#757575', // Fallback ('sonstiges' und Unbekanntes): grau
+      'sehenswuerdigkeit', MapColors.poiSehenswuerdigkeit(brightness),
+      'natur', MapColors.poiNatur(brightness),
+      'badestelle', MapColors.poiBadestelle(brightness),
+      'gastronomie', MapColors.poiGastronomie(brightness),
+      MapColors.poiSonstiges(brightness), // Fallback ('sonstiges'/unbekannt)
     ];
 
     await map.addCircleLayer(
       _poiSourceId,
       _poiLayerId,
-      const CircleLayerProperties(
+      CircleLayerProperties(
         circleRadius: 8,
         circleColor: colorByCategory,
         circleStrokeWidth: 1.5,
@@ -304,6 +310,8 @@ class _MapScreenState extends State<MapScreen> {
   Future<void> _loadAndShowReports() async {
     final map = _map;
     if (map == null) return;
+    // Vor dem ersten 'await' lesen (lint use_build_context_synchronously).
+    final brightness = Theme.of(context).brightness;
 
     final reports = await _reportRepository.loadReports();
     _reportById = {
@@ -327,9 +335,9 @@ class _MapScreenState extends State<MapScreen> {
       await map.addCircleLayer(
         _reportSourceId,
         _reportLayerId,
-        const CircleLayerProperties(
+        CircleLayerProperties(
           circleRadius: 9,
-          circleColor: '#C62828',
+          circleColor: MapColors.report(brightness),
           circleStrokeWidth: 2,
           circleStrokeColor: '#FFFFFF',
         ),
@@ -398,6 +406,8 @@ class _MapScreenState extends State<MapScreen> {
   Future<void> _showRoute(RouteResult route) async {
     final map = _map;
     if (map == null || route.points.isEmpty) return;
+    // Vor dem ersten 'await' lesen (lint use_build_context_synchronously).
+    final brightness = Theme.of(context).brightness;
 
     final geojson = {
       'type': 'FeatureCollection',
@@ -423,16 +433,16 @@ class _MapScreenState extends State<MapScreen> {
       );
       // Farbe je Verkehrsmittel, damit auf der Karte erkennbar bleibt,
       // welches Profil zuletzt berechnet wurde (Fuß = blau, Rad = grün).
-      const colorByProfile = [
+      final colorByProfile = [
         'match',
         ['get', 'profile'],
-        'bicycle', '#43A047',
-        '#1E88E5',
+        'bicycle', MapColors.routeRad(brightness),
+        MapColors.routeFuss(brightness),
       ];
       await map.addLineLayer(
         _routeSourceId,
         _routeLayerId,
-        const LineLayerProperties(
+        LineLayerProperties(
           lineColor: colorByProfile,
           lineWidth: 4,
           lineCap: 'round',
