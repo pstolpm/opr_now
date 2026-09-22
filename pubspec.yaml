@@ -47,6 +47,12 @@ dependencies:
   # Lokale SQLite-Speicherung fuer selbst erfasste Meldungen - Phase 8
   sqflite: ^2.4.4
 
+  # Temp-Verzeichnis fuer den GeoJSON-Export - Phase 9
+  path_provider: ^2.1.6
+
+  # Android-Share-Dialog zum Speichern/Versenden der exportierten Datei - Phase 9
+  share_plus: ^13.3.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

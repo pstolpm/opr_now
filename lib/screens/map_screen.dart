@@ -11,6 +11,7 @@ import '../models/weather_context.dart';
 import '../models/route_result.dart';
 import '../repositories/poi_repository.dart';
 import '../repositories/report_repository.dart';
+import '../services/export_service.dart';
 import '../services/location_controller.dart';
 import '../services/location_source.dart';
 import '../services/overpass_service.dart';
@@ -98,6 +99,7 @@ class _MapScreenState extends State<MapScreen> {
   static const _reportLayerId = 'user-report-dots';
   bool _reportLayerAdded = false;
   final _reportRepository = ReportRepository();
+  final _exportService = const ExportService();
 
   /// Geladene Meldungen, nach GeoJSON-Feature-id indiziert (Format
   /// `report:<sqlite-id>`), damit ein Tap auf die Karte die passende
@@ -654,6 +656,34 @@ class _MapScreenState extends State<MapScreen> {
     }
   }
 
+  /// Exportiert alle gespeicherten Meldungen als GeoJSON-Datei und
+  /// oeffnet dafuer den Android-Share-Dialog (Phase 9, PROJECT_BRAIN
+  /// Abschnitt 10). Fehlerfaelle (keine Meldungen, Datei konnte nicht
+  /// geschrieben werden, Teilen abgebrochen/fehlgeschlagen) zeigen eine
+  /// verstaendliche Meldung statt eines stillen Fehlschlags (Regel 8).
+  Future<void> _exportReports() async {
+    try {
+      final reports = await _reportRepository.loadReports();
+      await _exportService.exportAndShare(reports);
+    } on ExportException catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(_exportErrorText(e.failure))),
+      );
+    }
+  }
+
+  String _exportErrorText(ExportFailure failure) {
+    switch (failure) {
+      case ExportFailure.noReports:
+        return 'Noch keine Meldungen zum Exportieren vorhanden.';
+      case ExportFailure.writeFailed:
+        return 'GeoJSON-Datei konnte nicht erstellt werden.';
+      case ExportFailure.shareFailed:
+        return 'Teilen fehlgeschlagen oder abgebrochen.';
+    }
+  }
+
   // --- UI ------------------------------------------------------------------
 
   @override
@@ -666,6 +696,11 @@ class _MapScreenState extends State<MapScreen> {
             icon: const Icon(Icons.explore),
             tooltip: 'Entdecken - was kann ich jetzt machen?',
             onPressed: _openDiscover,
+          ),
+          IconButton(
+            icon: const Icon(Icons.ios_share),
+            tooltip: 'Meldungen als GeoJSON exportieren',
+            onPressed: _exportReports,
           ),
           _buildModeMenu(),
         ],
