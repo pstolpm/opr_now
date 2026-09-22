@@ -8,6 +8,7 @@ import '../models/poi.dart';
 import '../models/user_position.dart';
 import '../models/user_report.dart';
 import '../models/weather_context.dart';
+import '../logic/geofence_logic.dart';
 import '../models/route_result.dart';
 import '../repositories/poi_repository.dart';
 import '../repositories/report_repository.dart';
@@ -93,6 +94,7 @@ class _MapScreenState extends State<MapScreen> {
   static const _routeSourceId = 'route';
   static const _routeLayerId = 'route-line';
   bool _routeLayerAdded = false;
+  final _geofence = GeofenceLogic();
 
   // --- Nutzer-Meldungen (Phase 8) -----------------------------------------
   static const _reportSourceId = 'user-reports';
@@ -458,6 +460,11 @@ class _MapScreenState extends State<MapScreen> {
       debugPrint('Kamera-Anpassung an Route fehlgeschlagen: $e');
     }
 
+    // Geofence (Phase 10, PROJECT_BRAIN Abschnitt 8) automatisch auf das
+    // Routenziel aktivieren - sobald eine Route laeuft, soll die App bei
+    // Ankunft benachrichtigen.
+    _geofence.setTarget(route.points.last);
+
     if (!mounted) return;
     final km = (route.distanceMeters / 1000).toStringAsFixed(1);
     final minutes = (route.durationSeconds / 60).round();
@@ -518,6 +525,25 @@ class _MapScreenState extends State<MapScreen> {
       // (PROJECT_BRAIN Abschnitt 35 - Performance).
       unawaited(_loadWeather(position));
     }
+
+    // Geofence bei jedem Standort-Update pruefen (nicht nur beim ersten
+    // Fix), damit die Ankunft am Routenziel erkannt wird.
+    if (position != null) {
+      _checkGeofence(position);
+    }
+  }
+
+  /// Benachrichtigt, sobald die Position erstmals innerhalb des
+  /// Geofence-Schwellenwerts um das aktive Routenziel liegt (Phase 10).
+  void _checkGeofence(UserPosition position) {
+    if (!_geofence.checkArrival(position)) return;
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Ziel erreicht!'),
+        duration: Duration(seconds: 5),
+      ),
+    );
   }
 
   /// Lädt das aktuelle Wetter für [position] von Open-Meteo.
