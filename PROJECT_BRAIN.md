@@ -1,10 +1,5 @@
 # OPR NOW – PROJECT BRAIN
 
-> Zentrale Projekt- und Kontextdatei für die KI-gestützte Entwicklung der App **OPR NOW**.  
-> Diese Datei ist die verbindliche fachliche und technische Referenz für Claude, Antigravity oder andere Coding Agents.
->
-> **Wichtig:** Vor Änderungen am Projekt diese Datei vollständig lesen. Entscheidungen aus dieser Datei nicht stillschweigend überschreiben.
-
 ---
 
 ## 1. Projektkontext
