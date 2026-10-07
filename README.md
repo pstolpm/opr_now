@@ -29,12 +29,6 @@ exportiert werden.
 - Export der eigenen Meldungen als GeoJSON über die Android-Teilen-Funktion
 - Info-Seite mit Projektbeschreibung, Quellenangaben und FAQ
 
-## Status
-
-Die geplanten Entwicklungsphasen aus `PROJECT_BRAIN.md` sind umgesetzt, einschließlich der ursprünglich
-für später vorgesehenen Rundtour-Funktion, die auf Wunsch vorgezogen wurde. Ein Release-Build wurde
-erfolgreich erstellt (siehe unten).
-
 ## Technologiestack
 
 - Flutter / Dart
